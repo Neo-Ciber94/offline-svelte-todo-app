@@ -3,12 +3,12 @@ import { ApplicationError } from '$lib/common/error';
 import type { Todo } from '$lib/data';
 import {
 	TodoRepositoryInterface,
-	UserRepositoryInterface,
 	type CreateTodo,
 	type GetAllTodos,
 	type UpdateTodo
 } from './todos.interface';
 import type { NetworkTodosRepository } from './todos.network';
+import type { UserRepositoryInterface } from './user';
 
 const { get, set } = createIndexDb('todos-db');
 
