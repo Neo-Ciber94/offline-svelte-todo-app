@@ -2,17 +2,27 @@
 	import { page } from '$app/stores';
 	import Loading from '$lib/components/Loading.svelte';
 	import { todosRepository } from '$lib/dal';
-	import { createQuery } from '@tanstack/svelte-query';
+	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 	const todoId = $derived($page.params.todo_id);
 	const getTodoId = () => todoId;
 
+	const queryClient = useQueryClient();
 	const todoQuery = createQuery({
 		queryKey: ['todos', getTodoId()],
 		async queryFn() {
 			return todosRepository.getById(getTodoId());
 		}
 	});
+
+	async function handleCompleteTodo() {
+		await todosRepository.update({
+			id: todoId,
+			done: true
+		});
+
+		queryClient.invalidateQueries();
+	}
 </script>
 
 {#snippet Done(isDone: boolean)}
@@ -51,6 +61,7 @@
 			</div>
 			{#if !todo.done}
 				<button
+					onclick={handleCompleteTodo}
 					class="p-2 bg-neutral-800 hover:bg-neutral-950 text-white rounded-xl shadow text-center mx-2 mb-2"
 				>
 					<span> Mark as Complete</span>
