@@ -15,7 +15,7 @@
 	>
 		<a
 			href="/todos"
-			class="font-bold text-2xl text-blue-500 mt-5 pb-2 md:hidden flex flex-row gap-2 w-full justify-center items-center"
+			class="font-bold text-2xl text-green-500 mt-5 pb-2 md:hidden flex flex-row gap-2 w-full justify-center items-center"
 		>
 			<img src="/icons/todoapp.png" alt="logo" class="size-7" />
 			<span>TodoApp</span>
