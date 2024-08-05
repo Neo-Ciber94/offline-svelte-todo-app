@@ -1,4 +1,5 @@
 import { createIndexDb } from '$lib/client/idb-kv';
+import { ApplicationError } from '$lib/common/error';
 import type { Todo } from '$lib/data';
 import {
 	TodoRepositoryInterface,
@@ -96,7 +97,7 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 		const user = await this.userRepository.getCurrentUser();
 
 		if (!user) {
-			throw new Error('Failed to get current user');
+			throw new ApplicationError(400, 'Failed to get current user');
 		}
 
 		const userId = user.id;

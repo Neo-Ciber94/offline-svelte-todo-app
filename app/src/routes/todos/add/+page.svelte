@@ -1,0 +1,66 @@
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { ApplicationError } from '$lib/common/error';
+	import { todosRepository } from '$lib/dal';
+
+	let title = $state('');
+	let description = $state('');
+	let isLoading = $state(false);
+	let error = $state<string>();
+
+	async function handleAddTodo(ev: SubmitEvent) {
+		ev.preventDefault();
+		error = undefined;
+		isLoading = true;
+
+		try {
+			const result = await todosRepository.insert({
+				title,
+				description
+			});
+
+			await goto(`/todos/${result.id}`);
+		} catch (err) {
+			error = err instanceof ApplicationError ? err.message : 'Failed to add todo';
+		} finally {
+			isLoading = false;
+		}
+	}
+</script>
+
+<div class="w-full h-[75vh] flex flex-col justify-center items-center">
+	<form
+		onsubmit={handleAddTodo}
+		class="w-[95vw] sm:w-[500px] flex flex-col gap-2 shadow border p-4 rounded-md"
+	>
+		<h2 class="font-bold text-2xl">Add Todo</h2>
+		<input
+			disabled={isLoading}
+			bind:value={title}
+			name="username"
+			class="border px-2 py-1 rounded-md shadow"
+			placeholder="Title"
+			required
+		/>
+		<textarea
+			disabled={isLoading}
+			bind:value={description}
+			name="description"
+			class="border px-2 py-1 rounded-md shadow"
+			placeholder="Description"
+			rows={5}
+		></textarea>
+		<button
+			disabled={isLoading}
+			class="bg-black text-white p-2 rounded-md disabled:opacity-70 disabled:cursor-not-allowed"
+		>
+			Add
+		</button>
+
+		{#if error}
+			<p class="text-sm font-bold p-4 bg-red-200/90 text-red-700 rounded-md">
+				{error}
+			</p>
+		{/if}
+	</form>
+</div>
