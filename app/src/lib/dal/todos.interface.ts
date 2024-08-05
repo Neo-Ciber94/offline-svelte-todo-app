@@ -1,3 +1,4 @@
+import type { Result } from '$lib/common';
 import type { Todo, User } from '$lib/data';
 
 export type GetAllTodos = {
@@ -33,6 +34,7 @@ export abstract class TodoRepositoryInterface {
 
 export abstract class UserRepositoryInterface {
 	abstract getCurrentUser(): Promise<User | null>;
+	abstract register(username: string): Promise<Result<User, string>>;
 	abstract logout(): Promise<void>;
 }
 

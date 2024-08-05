@@ -1,4 +1,5 @@
 import { createIndexDb } from '$lib/client/idb-kv';
+import type { Result } from '$lib/common';
 import type { User } from '$lib/data';
 import { networkProvider } from './network-provider';
 import { NetworkProvider, UserRepositoryInterface } from './todos.interface';
@@ -33,6 +34,31 @@ class UserRepository extends UserRepositoryInterface {
 		const json = devalue.parse(contents) as User;
 		await set('user', json);
 		return json;
+	}
+
+	async register(username: string): Promise<Result<User, string>> {
+		try {
+			const res = await fetch('/api/users/register', {
+				method: 'POST',
+				body: devalue.stringify({ username })
+			});
+
+			const contents = await res.text();
+
+			if (!res.ok) {
+				const json = JSON.parse(contents);
+				const error =
+					typeof json?.message === 'string' ? json.message : 'Failed to register account';
+
+				return { success: false, error };
+			}
+
+			const user = devalue.parse(contents) as User;
+			return { success: true, data: user };
+		} catch (err) {
+			console.error(err);
+			return { success: false, error: 'Failed to register account' };
+		}
 	}
 
 	async logout(): Promise<void> {

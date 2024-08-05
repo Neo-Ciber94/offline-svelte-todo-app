@@ -16,7 +16,7 @@
 	<title>TodoApp</title>
 </svelte:head>
 
-<Header />
 <QueryClientProvider client={queryClient}>
+	<Header />
 	{@render children()}
 </QueryClientProvider>
