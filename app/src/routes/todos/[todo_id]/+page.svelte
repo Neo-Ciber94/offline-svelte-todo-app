@@ -47,7 +47,12 @@
 		{@const todo = $todoQuery.data}
 
 		<div class="flex flex-col w-[95vw] sm:w-[500px] rounded-xl border shadow overflow-hidden">
-			<div class="bg-black text-white p-4 text-xl">{todo.title}</div>
+			<div class="bg-black text-white p-4 text-xl flex flex-row items-center justify-between">
+				<span>
+					{todo.title}
+				</span>
+				<a class="font-semibold text-orange-400" href={`/todos/${todo.id}/edit`}>Edit</a>
+			</div>
 			<div class="p-4">
 				{#if todo.description}
 					<p>
