@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import type { Snippet } from 'svelte';
+	import Header from './Header.svelte';
 
 	type Props = {
 		children: Snippet;
@@ -15,6 +16,7 @@
 	<title>TodoApp</title>
 </svelte:head>
 
+<Header />
 <QueryClientProvider client={queryClient}>
 	{@render children()}
 </QueryClientProvider>
