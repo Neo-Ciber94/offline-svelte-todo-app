@@ -8,12 +8,14 @@
 	const getTodoId = () => todoId;
 
 	const queryClient = useQueryClient();
-	const todoQuery = createQuery({
-		queryKey: ['todos', getTodoId()],
-		async queryFn() {
-			return todosRepository.getById(getTodoId());
-		}
-	});
+	const todoQuery = $derived(
+		createQuery({
+			queryKey: ['todos', getTodoId()],
+			async queryFn() {
+				return todosRepository.getById(getTodoId());
+			}
+		})
+	);
 
 	async function handleCompleteTodo() {
 		await todosRepository.update({
