@@ -26,7 +26,7 @@
 		{#if todo.description}
 			<p
 				data-done={todo.done}
-				class="text-sm data-[done=true]:line-through data-[done=true]:opacity-40"
+				class="text-sm data-[done=true]:line-through data-[done=true]:opacity-40 whitespace-nowrap overflow-hidden text-ellipsis"
 			>
 				{todo.description}
 			</p>
