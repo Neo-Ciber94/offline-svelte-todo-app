@@ -2,15 +2,18 @@ import { COOKIE_AUTH_TOKEN } from '$lib/common/constants';
 import { getUserByToken } from '$lib/server';
 import { redirect, type Cookies, type Handle } from '@sveltejs/kit';
 
+const PUBLIC_ROUTES = ['/login', '/register'];
+
 export const handle: Handle = async ({ event, resolve }) => {
 	const user = await getUserFromCookies(event.cookies);
+	const pathname = event.url.pathname;
 	event.locals.user = user;
 
-	if (event.url.pathname.startsWith('/api')) {
+	if (pathname.startsWith('/api')) {
 		return resolve(event);
 	}
 
-	if (!user && !event.url.pathname.startsWith('/login')) {
+	if (!user && !PUBLIC_ROUTES.some((p) => pathname.startsWith(p))) {
 		redirect(302, '/login');
 	}
 
