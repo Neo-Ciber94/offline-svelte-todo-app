@@ -1,0 +1,16 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "app",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "format": "turbo format",
+    "lint": "turbo lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.11"
+  }
+}
