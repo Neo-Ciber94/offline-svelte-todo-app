@@ -1,3 +1,4 @@
+import { ApplicationError } from '$lib/common/error';
 import type { CreateTodo, GetAllTodos, UpdateTodo } from '$lib/dal/todos.interface';
 import type { Todo, User } from '$lib/data';
 
@@ -106,6 +107,12 @@ export async function deleteTodo(userId: string, todoId: string) {
 }
 
 export async function registerUser(username: string) {
+	const alreadyExists = Array.from(USERS.values()).some((user) => user.username === username);
+
+	if (alreadyExists) {
+		throw new ApplicationError(400, 'User already exists');
+	}
+
 	const user: User = {
 		id: crypto.randomUUID(),
 		createdAt: new Date(),
@@ -124,4 +131,15 @@ export async function getUser(userId: string) {
 	}
 
 	return Object.assign({}, user);
+}
+
+export async function generateUserToken(user: User) {
+	const authToken = btoa(user.id);
+	return authToken;
+}
+
+export async function getUserByToken(authToken: string) {
+	const userId = atob(authToken);
+	const user = await getUser(userId);
+	return user;
 }

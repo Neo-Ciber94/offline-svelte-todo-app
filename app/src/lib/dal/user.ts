@@ -23,7 +23,7 @@ class UserRepository extends UserRepositoryInterface {
 			return user ?? null;
 		}
 
-		const res = await fetch('/api/user/me');
+		const res = await fetch('/api/users/me');
 		const contents = await res.text();
 
 		if (!res.ok) {
@@ -40,14 +40,9 @@ class UserRepository extends UserRepositoryInterface {
 			throw new Error('Cannot logout while offline');
 		}
 
-		const res = await fetch('/api/user/logout');
-
-		if (!res.ok) {
-			return;
-		}
-
-		this.#user = null;
 		await del('user');
+		this.#user = null;
+		location.href = `${location.origin}/api/users/logout`;
 	}
 }
 

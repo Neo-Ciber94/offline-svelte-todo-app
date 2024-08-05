@@ -29,29 +29,33 @@ export class NetworkTodosRepository extends TodoRepositoryInterface {
 		}
 
 		const res = await fetch(`/api/todos?${searchParams.toString()}`);
-
 		const contents = await res.text();
-		const json = devalue.parse(contents);
 
 		if (!res.ok) {
+			const json = JSON.parse(contents);
 			const error = typeof json?.message === 'string' ? json.message : 'Something went wrong';
 			throw new Error(error);
 		}
 
+		const json = devalue.parse(contents);
 		return json as Todo[];
 	}
 
 	async getById(todoId: string): Promise<Todo | null> {
-		const res = await fetch(`/api/todos?${todoId}`);
-
+		const res = await fetch(`/api/todos/${todoId}`);
 		const contents = await res.text();
-		const json = devalue.parse(contents);
+
+		if (res.status === 404) {
+			return null;
+		}
 
 		if (!res.ok) {
+			const json = JSON.parse(contents);
 			const error = typeof json?.message === 'string' ? json.message : 'Something went wrong';
 			throw new Error(error);
 		}
 
+		const json = devalue.parse(contents);
 		return json as Todo;
 	}
 
@@ -65,18 +69,19 @@ export class NetworkTodosRepository extends TodoRepositoryInterface {
 		});
 
 		const contents = await res.text();
-		const json = devalue.parse(contents);
 
 		if (!res.ok) {
+			const json = JSON.parse(contents);
 			const error = typeof json?.message === 'string' ? json.message : 'Something went wrong';
 			throw new Error(error);
 		}
 
+		const json = devalue.parse(contents);
 		return json as Todo;
 	}
 
 	async update(input: UpdateTodo): Promise<Todo | null> {
-		const res = await fetch(`/api/todos`, {
+		const res = await fetch(`/api/todos/${input.id}`, {
 			method: 'PUT',
 			body: devalue.stringify(input),
 			headers: {
@@ -85,13 +90,14 @@ export class NetworkTodosRepository extends TodoRepositoryInterface {
 		});
 
 		const contents = await res.text();
-		const json = devalue.parse(contents);
 
 		if (!res.ok) {
+			const json = JSON.parse(contents);
 			const error = typeof json?.message === 'string' ? json.message : 'Something went wrong';
 			throw new Error(error);
 		}
 
+		const json = devalue.parse(contents);
 		return json as Todo;
 	}
 
@@ -101,13 +107,14 @@ export class NetworkTodosRepository extends TodoRepositoryInterface {
 		});
 
 		const contents = await res.text();
-		const json = devalue.parse(contents);
 
 		if (!res.ok) {
+			const json = JSON.parse(contents);
 			const error = typeof json?.message === 'string' ? json.message : 'Something went wrong';
 			throw new Error(error);
 		}
 
+		const json = devalue.parse(contents);
 		return json as Todo;
 	}
 }
