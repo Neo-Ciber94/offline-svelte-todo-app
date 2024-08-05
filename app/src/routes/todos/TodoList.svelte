@@ -37,7 +37,7 @@
 <div class="w-full h-full flex flex-col gap-2 p-2">
 	<a
 		href="/todos/add"
-		class="bg-neutral-800 hover:bg-neutral-950 text-white p-2 rounded-md text-lg flex flex-row items-center justify-center shadow"
+		class="bg-neutral-800 hover:bg-neutral-950 text-white p-2 rounded-md text-lg flex flex-row items-center justify-center shadow my-4"
 	>
 		Add Todo
 	</a>

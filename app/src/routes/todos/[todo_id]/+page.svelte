@@ -67,21 +67,21 @@
 		{@const todo = $todoQuery.data}
 
 		<div class="flex flex-col w-[95vw] sm:w-[500px] rounded-xl border shadow overflow-hidden">
-			<div class="bg-black text-white p-4 text-xl flex flex-row items-center justify-between">
-				<span>
+			<div class="bg-black text-white py-4 px-1 text-xl flex flex-row items-center justify-between">
+				<span class="pl-4">
 					{todo.title}
 				</span>
-				<div class="flex flex-row gap-3 text-sm">
+				<div class="flex flex-row text-sm">
 					<button
 						disabled={isMutating}
-						class="font-semibold text-red-400 disabled:opacity-70 disabled:cursor-not-allowed"
+						class="font-semibold text-red-400 disabled:opacity-70 disabled:cursor-not-allowed min-w-16 text-center"
 						onclick={deleteTodo}
 					>
 						Delete
 					</button>
 					<a
 						data-disabled={isMutating}
-						class="font-semibold text-orange-400 data-[disabled=true]:cursor-not-allowed"
+						class="font-semibold text-orange-400 data-[disabled=true]:cursor-not-allowed min-w-16 text-center"
 						href={`/todos/${todo.id}/edit`}
 					>
 						Edit
