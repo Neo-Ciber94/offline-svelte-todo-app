@@ -11,11 +11,11 @@
 
 <main class="flex flex-row w-full h-[calc(100vh-4rem)]">
 	<aside
-		class="fixed top-0 left-0 h-screen md:static w-[400px] border-r border-neutral-200 bg-white shadow z-10 md:z-auto"
+		class="fixed top-0 left-0 h-screen lg:static w-[400px] border-r border-neutral-200 bg-white shadow z-10 lg:z-auto"
 	>
 		<a
 			href="/todos"
-			class="font-bold text-2xl text-green-500 mt-5 pb-2 md:hidden flex flex-row gap-2 w-full justify-center items-center"
+			class="font-bold text-2xl text-green-500 mt-5 pb-2 lg:hidden flex flex-row gap-2 w-full justify-center items-center"
 		>
 			<img src="/icons/todoapp.png" alt="logo" class="size-7" />
 			<span>TodoApp</span>
