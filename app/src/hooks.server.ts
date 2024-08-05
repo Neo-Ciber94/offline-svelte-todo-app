@@ -10,7 +10,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	if (!user) {
+	if (!user && !event.url.pathname.startsWith('/login')) {
 		redirect(302, '/login');
 	}
 
