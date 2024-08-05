@@ -1,13 +1,13 @@
 import { COOKIE_AUTH_TOKEN } from '$lib/common/constants';
 import { ApplicationError } from '$lib/common/error';
-import { generateUserToken, registerUser } from '$lib/server';
+import { generateUserToken, getUserByUsername } from '$lib/server';
 import { customJson } from '$lib/server/helpers';
 import { error, isHttpError, type RequestHandler } from '@sveltejs/kit';
 import * as devalue from 'devalue';
 import { z } from 'zod';
 
-const registerUserSchema = z.object({
-	username: z.string().trim().min(3)
+const loginUserSchema = z.object({
+	username: z.string()
 });
 
 export const POST: RequestHandler = async (event) => {
@@ -15,7 +15,7 @@ export const POST: RequestHandler = async (event) => {
 
 	try {
 		const json = devalue.parse(contents);
-		const result = registerUserSchema.safeParse(json);
+		const result = loginUserSchema.safeParse(json);
 
 		if (!result.success) {
 			const message = result.error.issues
@@ -25,9 +25,13 @@ export const POST: RequestHandler = async (event) => {
 			return error(400, { message });
 		}
 
-		const user = await registerUser(result.data.username);
-		const authToken = await generateUserToken(user);
+		const user = await getUserByUsername(result.data.username);
 
+		if (!user) {
+			error(404, { message: 'User not found' });
+		}
+
+		const authToken = await generateUserToken(user);
 		const expires = new Date();
 		expires.setDate(expires.getDate() + 30);
 
@@ -36,9 +40,7 @@ export const POST: RequestHandler = async (event) => {
 			expires
 		});
 
-		return customJson(user, {
-			status: 201
-		});
+		return customJson(user);
 	} catch (err) {
 		if (isHttpError(err)) {
 			throw err;

@@ -1,5 +1,5 @@
 import { deleteTodo, getTodoById, updateTodo } from '$lib/server';
-import { error } from '@sveltejs/kit';
+import { error, isHttpError } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { customJson } from '$lib/server/helpers';
 import { z } from 'zod';
@@ -50,6 +50,10 @@ export const PUT: RequestHandler = async (event) => {
 		const createdTodo = await updateTodo(user.id, result.data);
 		return customJson(createdTodo);
 	} catch (err) {
+		if (isHttpError(err)) {
+			throw err;
+		}
+
 		console.error(err);
 		error(500, { message: 'Internal Error' });
 	}
@@ -71,6 +75,10 @@ export const DELETE: RequestHandler = async (event) => {
 
 		return customJson(deleted);
 	} catch (err) {
+		if (isHttpError(err)) {
+			throw err;
+		}
+
 		console.error(err);
 		error(500, { message: 'Internal Error' });
 	}

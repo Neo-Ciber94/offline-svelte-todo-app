@@ -133,6 +133,16 @@ export async function getUser(userId: string) {
 	return Object.assign({}, user);
 }
 
+export async function getUserByUsername(username: string) {
+	const user = Array.from(USERS.values()).find((user) => user.username === username);
+
+	if (!user) {
+		return null;
+	}
+
+	return Object.assign({}, user);
+}
+
 export async function generateUserToken(user: User) {
 	const authToken = btoa(user.id);
 	return authToken;

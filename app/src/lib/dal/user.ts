@@ -54,10 +54,46 @@ class UserRepository extends UserRepositoryInterface {
 			}
 
 			const user = devalue.parse(contents) as User;
+
+			{
+				this.#user = user;
+				await set('user', user);
+			}
+
 			return { success: true, data: user };
 		} catch (err) {
 			console.error(err);
 			return { success: false, error: 'Failed to register account' };
+		}
+	}
+
+	async login(username: string): Promise<Result<User, string>> {
+		try {
+			const res = await fetch('/api/users/login', {
+				method: 'POST',
+				body: devalue.stringify({ username })
+			});
+
+			const contents = await res.text();
+
+			if (!res.ok) {
+				const json = JSON.parse(contents);
+				const error = typeof json?.message === 'string' ? json.message : 'Failed to login';
+
+				return { success: false, error };
+			}
+
+			const user = devalue.parse(contents) as User;
+
+			{
+				this.#user = user;
+				await set('user', user);
+			}
+
+			return { success: true, data: user };
+		} catch (err) {
+			console.error(err);
+			return { success: false, error: 'Failed to login' };
 		}
 	}
 

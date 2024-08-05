@@ -1,6 +1,6 @@
 import { createTodo, getTodos } from '$lib/server';
 import { customJson } from '$lib/server/helpers';
-import { error, type RequestHandler } from '@sveltejs/kit';
+import { error, isHttpError, type RequestHandler } from '@sveltejs/kit';
 import { z } from 'zod';
 import * as devalue from 'devalue';
 
@@ -76,6 +76,10 @@ export const POST: RequestHandler = async (event) => {
 		const createdTodo = await createTodo(user.id, result.data);
 		return customJson(createdTodo);
 	} catch (err) {
+		if (isHttpError(err)) {
+			throw err;
+		}
+
 		console.error(err);
 		error(500, { message: 'Internal Error' });
 	}

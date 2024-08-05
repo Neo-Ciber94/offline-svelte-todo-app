@@ -1,7 +1,23 @@
 <script lang="ts">
-	let username = $state('');
+	import { goto } from '$app/navigation';
+	import { userRepository } from '$lib/dal/user';
 
-	async function handleLogin() {}
+	let username = $state('');
+	let error = $state<string>();
+
+	async function handleLogin(ev: SubmitEvent) {
+		ev.preventDefault();
+		error = undefined;
+
+		const result = await userRepository.login(username);
+
+		if (result.success) {
+			await goto('/todos');
+			return;
+		}
+
+		error = result.error;
+	}
 </script>
 
 <div class="w-full h-[75vh] flex flex-col justify-center items-center">
@@ -20,5 +36,11 @@
 		<p class="text-sm text-neutral-500">
 			Do not have an account? <a href="/register" class="text-blue-600">Register here</a>
 		</p>
+
+		{#if error}
+			<p class="text-sm font-bold p-4 bg-red-200/90 text-red-700 rounded-md">
+				{error}
+			</p>
+		{/if}
 	</form>
 </div>
