@@ -1,7 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import Loading from '$lib/components/Loading.svelte';
+	import { todosRepository } from '$lib/dal';
+	import { createQuery } from '@tanstack/svelte-query';
 
 	const todoId = $derived($page.params.todo_id);
+	const getTodoId = () => todoId;
+
+	const todoQuery = createQuery({
+		queryKey: ['todos', getTodoId()],
+		async queryFn() {
+			return todosRepository.getById(getTodoId());
+		}
+	});
 </script>
 
 {#snippet Done(isDone: boolean)}
@@ -18,23 +29,33 @@
 {/snippet}
 
 <div class="w-full h-full flex flex-row justify-center items-center">
-	<div class="flex flex-col w-[95vw] sm:w-[500px] rounded-xl border shadow overflow-hidden">
-		<div class="bg-black text-white p-4 text-xl">Todo {todoId}</div>
-		<div class="p-4">
-			<p>
-				Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis veritatis fugit
-				temporibus accusantium dolorem assumenda facere sequi autem laudantium repudiandae, et nam
-				corrupti libero ut, voluptates aperiam harum tempore deserunt.
-			</p>
+	{#if $todoQuery.isLoading}
+		<Loading class="size-10" />
+	{:else if $todoQuery.data}
+		{@const todo = $todoQuery.data}
 
-			<div class="mt-4 w-fit">
-				{@render Done(Math.random() > 0.5)}
+		<div class="flex flex-col w-[95vw] sm:w-[500px] rounded-xl border shadow overflow-hidden">
+			<div class="bg-black text-white p-4 text-xl">{todo.title}</div>
+			<div class="p-4">
+				{#if todo.description}
+					<p>
+						{todo?.description}
+					</p>
+				{:else}
+					<p class="text-neutral-400 italic">No description</p>
+				{/if}
+
+				<div class="mt-4 w-fit">
+					{@render Done(todo.done)}
+				</div>
 			</div>
+			{#if !todo.done}
+				<button
+					class="p-2 bg-neutral-800 hover:bg-neutral-950 text-white rounded-xl shadow text-center mx-2 mb-2"
+				>
+					<span> Mark as Complete</span>
+				</button>
+			{/if}
 		</div>
-		<button
-			class="p-2 bg-neutral-800 hover:bg-neutral-950 text-white rounded-xl shadow text-center mx-2 mb-2"
-		>
-			<span> Mark as Complete</span>
-		</button>
-	</div>
+	{/if}
 </div>

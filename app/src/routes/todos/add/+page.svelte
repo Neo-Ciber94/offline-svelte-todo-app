@@ -2,11 +2,13 @@
 	import { goto } from '$app/navigation';
 	import { ApplicationError } from '$lib/common/error';
 	import { todosRepository } from '$lib/dal';
+	import { useQueryClient } from '@tanstack/svelte-query';
 
 	let title = $state('');
 	let description = $state('');
 	let isLoading = $state(false);
 	let error = $state<string>();
+	const queryClient = useQueryClient();
 
 	async function handleAddTodo(ev: SubmitEvent) {
 		ev.preventDefault();
@@ -19,6 +21,7 @@
 				description
 			});
 
+			queryClient.invalidateQueries();
 			await goto(`/todos/${result.id}`);
 		} catch (err) {
 			error = err instanceof ApplicationError ? err.message : 'Failed to add todo';
