@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { storeToRune } from '$lib/client/storeToRune.svelte';
 	import Loading from '$lib/components/Loading.svelte';
 	import { todosRepository } from '$lib/dal/todos';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 	const todoId = $derived($page.params.todo_id);
-	const getTodoId = () => todoId;
-
 	const queryClient = useQueryClient();
-	const todoQuery = $derived(
-		createQuery({
-			queryKey: ['todos', getTodoId()],
+
+	const todoQuery = createQuery(
+		storeToRune(() => ({
+			queryKey: ['todos', todoId],
 			async queryFn() {
-				return todosRepository.getById(getTodoId());
+				return todosRepository.getById(todoId);
 			}
-		})
+		}))
 	);
 
 	async function handleCompleteTodo() {
