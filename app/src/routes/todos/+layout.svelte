@@ -11,7 +11,7 @@
 
 <main class="flex flex-row w-full h-[calc(100vh-4rem)]">
 	<aside
-		class="fixed top-0 left-0 h-screen md:static md:w-[400px] border-r border-neutral-200 bg-white shadow z-10 md:z-0"
+		class="fixed top-0 left-0 h-screen md:static md:w-[400px] border-r border-neutral-200 bg-white shadow z-10 md:z-auto"
 	>
 		<a
 			href="/todos"
