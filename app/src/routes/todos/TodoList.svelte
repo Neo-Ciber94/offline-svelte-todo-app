@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Loading from '$lib/components/Loading.svelte';
-	import { todosRepository } from '$lib/dal';
+	import { todosRepository } from '$lib/dal/todos';
 	import type { Todo } from '$lib/data';
 	import { createQuery } from '@tanstack/svelte-query';
 

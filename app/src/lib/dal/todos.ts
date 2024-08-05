@@ -41,6 +41,9 @@ class TodoRepository extends TodoRepositoryInterface {
 			return this.local.insert(input);
 		}
 
+		// Update local first
+		await this.local.insert(input);
+
 		const result = await this.network.insert(input);
 		this.local.invalidate().catch(console.error);
 		return result;
@@ -51,6 +54,9 @@ class TodoRepository extends TodoRepositoryInterface {
 			return this.local.update(input);
 		}
 
+		// Update local first
+		await this.local.update(input);
+
 		const result = await this.network.update(input);
 		this.local.invalidate().catch(console.error);
 		return result;
@@ -60,6 +66,9 @@ class TodoRepository extends TodoRepositoryInterface {
 		if (!this.networkProvider.isOnline()) {
 			return this.local.delete(todoId);
 		}
+
+		// Update local first
+		await this.local.delete(todoId);
 
 		const result = await this.network.delete(todoId);
 		this.local.invalidate().catch(console.error);

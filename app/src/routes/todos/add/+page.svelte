@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { ApplicationError } from '$lib/common/error';
-	import { todosRepository } from '$lib/dal';
+	import { todosRepository } from '$lib/dal/todos';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	let title = $state('');

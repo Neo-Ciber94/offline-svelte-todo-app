@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Loading from '$lib/components/Loading.svelte';
-	import { todosRepository } from '$lib/dal';
+	import { todosRepository } from '$lib/dal/todos';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 	const todoId = $derived($page.params.todo_id);
