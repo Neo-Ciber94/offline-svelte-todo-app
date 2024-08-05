@@ -1,7 +1,6 @@
 import type { Todo } from '$lib/data';
-import { networkProvider } from './network-provider';
+import { checkNetwork, NetworkService } from './network-service';
 import {
-	NetworkProvider,
 	TodoRepositoryInterface,
 	type CreateTodo,
 	type GetAllTodos,
@@ -13,7 +12,7 @@ import { userRepository } from './user';
 
 class TodoRepository extends TodoRepositoryInterface {
 	constructor(
-		private readonly networkProvider: NetworkProvider,
+		private readonly networkService: NetworkService,
 		private readonly local: LocalTodosRepository,
 		private readonly network: NetworkTodosRepository
 	) {
@@ -21,7 +20,7 @@ class TodoRepository extends TodoRepositoryInterface {
 	}
 
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
-		if (!this.networkProvider.isOnline()) {
+		if (!this.networkService.isOnline()) {
 			return this.local.getAll(query);
 		}
 
@@ -29,7 +28,7 @@ class TodoRepository extends TodoRepositoryInterface {
 	}
 
 	async getById(todoId: string): Promise<Todo | null> {
-		if (!this.networkProvider.isOnline()) {
+		if (!this.networkService.isOnline()) {
 			return this.local.getById(todoId);
 		}
 
@@ -37,7 +36,7 @@ class TodoRepository extends TodoRepositoryInterface {
 	}
 
 	async insert(input: CreateTodo): Promise<Todo> {
-		if (!this.networkProvider.isOnline()) {
+		if (!this.networkService.isOnline()) {
 			return this.local.insert(input);
 		}
 
@@ -50,7 +49,7 @@ class TodoRepository extends TodoRepositoryInterface {
 	}
 
 	async update(input: UpdateTodo): Promise<Todo | null> {
-		if (!this.networkProvider.isOnline()) {
+		if (!this.networkService.isOnline()) {
 			return this.local.update(input);
 		}
 
@@ -63,7 +62,7 @@ class TodoRepository extends TodoRepositoryInterface {
 	}
 
 	async delete(todoId: string): Promise<Todo | null> {
-		if (!this.networkProvider.isOnline()) {
+		if (!this.networkService.isOnline()) {
 			return this.local.delete(todoId);
 		}
 
@@ -80,7 +79,7 @@ const networkTodoRepository = new NetworkTodosRepository();
 const localTodoRepository = new LocalTodosRepository(networkTodoRepository, userRepository);
 
 export const todosRepository = new TodoRepository(
-	networkProvider,
+	checkNetwork,
 	localTodoRepository,
 	networkTodoRepository
 );

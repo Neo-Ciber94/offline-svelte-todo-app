@@ -1,16 +1,22 @@
 import { createIndexDb } from '$lib/client/idb-kv';
 import type { Result } from '$lib/common';
+import { ApplicationError } from '$lib/common/error';
 import type { User } from '$lib/data';
-import { networkProvider } from './network-provider';
-import { NetworkProvider, UserRepositoryInterface } from './todos.interface';
+import { checkNetwork, NetworkService } from './network-service';
 import * as devalue from 'devalue';
 
 const { get, set, del } = createIndexDb('todos-db');
 
+export abstract class UserRepositoryInterface {
+	abstract getCurrentUser(): Promise<User | null>;
+	abstract register(username: string): Promise<Result<User, string>>;
+	abstract logout(): Promise<void>;
+}
+
 class UserRepository extends UserRepositoryInterface {
 	#user: User | null | undefined = undefined;
 
-	constructor(private readonly networkProvider: NetworkProvider) {
+	constructor(private readonly networkService: NetworkService) {
 		super();
 	}
 
@@ -19,7 +25,7 @@ class UserRepository extends UserRepositoryInterface {
 			return this.#user;
 		}
 
-		if (!this.networkProvider.isOnline()) {
+		if (!this.networkService.isOnline()) {
 			const user = await get<User>('user');
 			return user ?? null;
 		}
@@ -37,6 +43,10 @@ class UserRepository extends UserRepositoryInterface {
 	}
 
 	async register(username: string): Promise<Result<User, string>> {
+		if (!this.networkService.isOnline()) {
+			throw new ApplicationError(400, 'Unable to register while offline');
+		}
+
 		try {
 			const res = await fetch('/api/users/register', {
 				method: 'POST',
@@ -68,6 +78,10 @@ class UserRepository extends UserRepositoryInterface {
 	}
 
 	async login(username: string): Promise<Result<User, string>> {
+		if (!this.networkService.isOnline()) {
+			throw new ApplicationError(400, 'Unable to login while offline');
+		}
+
 		try {
 			const res = await fetch('/api/users/login', {
 				method: 'POST',
@@ -98,8 +112,8 @@ class UserRepository extends UserRepositoryInterface {
 	}
 
 	async logout(): Promise<void> {
-		if (!this.networkProvider.isOnline()) {
-			throw new Error('Cannot logout while offline');
+		if (!this.networkService.isOnline()) {
+			throw new ApplicationError(400, 'Unable to logout while offline');
 		}
 
 		await del('user');
@@ -108,4 +122,4 @@ class UserRepository extends UserRepositoryInterface {
 	}
 }
 
-export const userRepository = new UserRepository(networkProvider);
+export const userRepository = new UserRepository(checkNetwork);

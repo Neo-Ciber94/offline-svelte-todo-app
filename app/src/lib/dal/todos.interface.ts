@@ -1,5 +1,4 @@
-import type { Result } from '$lib/common';
-import type { Todo, User } from '$lib/data';
+import type { Todo } from '$lib/data';
 
 export type GetAllTodos = {
 	filter?: {
@@ -30,14 +29,4 @@ export abstract class TodoRepositoryInterface {
 	abstract insert(input: CreateTodo): Promise<Todo>;
 	abstract update(input: UpdateTodo): Promise<Todo | null>;
 	abstract delete(todoId: string): Promise<Todo | null>;
-}
-
-export abstract class UserRepositoryInterface {
-	abstract getCurrentUser(): Promise<User | null>;
-	abstract register(username: string): Promise<Result<User, string>>;
-	abstract logout(): Promise<void>;
-}
-
-export abstract class NetworkProvider {
-	abstract isOnline(): boolean;
 }
