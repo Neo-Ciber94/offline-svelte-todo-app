@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { storeToRune } from '$lib/client/storeToRune.svelte';
 	import Loading from '$lib/components/Loading.svelte';
@@ -7,6 +8,7 @@
 
 	const todoId = $derived($page.params.todo_id);
 	const queryClient = useQueryClient();
+	let isMutating = $state(false);
 
 	const todoQuery = createQuery(
 		storeToRune(() => ({
@@ -24,6 +26,24 @@
 		});
 
 		queryClient.invalidateQueries();
+	}
+
+	async function deleteTodo() {
+		const data = $todoQuery.data!;
+
+		if (!confirm(`Delete "${data.title}"?`)) {
+			return;
+		}
+
+		isMutating = true;
+
+		try {
+			await todosRepository.delete(todoId);
+			queryClient.invalidateQueries();
+			await goto('/todos');
+		} finally {
+			isMutating = false;
+		}
 	}
 </script>
 
@@ -51,7 +71,22 @@
 				<span>
 					{todo.title}
 				</span>
-				<a class="font-semibold text-orange-400" href={`/todos/${todo.id}/edit`}>Edit</a>
+				<div class="flex flex-row gap-3 text-sm">
+					<button
+						disabled={isMutating}
+						class="font-semibold text-red-400 disabled:opacity-70 disabled:cursor-not-allowed"
+						onclick={deleteTodo}
+					>
+						Delete
+					</button>
+					<a
+						data-disabled={isMutating}
+						class="font-semibold text-orange-400 data-[disabled=true]:cursor-not-allowed"
+						href={`/todos/${todo.id}/edit`}
+					>
+						Edit
+					</a>
+				</div>
 			</div>
 			<div class="p-4">
 				{#if todo.description}
@@ -68,8 +103,9 @@
 			</div>
 			{#if !todo.done}
 				<button
+					disabled={isMutating}
 					onclick={handleCompleteTodo}
-					class="p-2 bg-neutral-800 hover:bg-neutral-950 text-white rounded-xl shadow text-center mx-2 mb-2"
+					class="p-2 bg-neutral-800 hover:bg-neutral-950 text-white rounded-xl shadow text-center mx-2 mb-2 disabled:opacity-70 disabled:cursor-not-allowed"
 				>
 					<span> Mark as Complete</span>
 				</button>
