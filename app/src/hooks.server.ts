@@ -1,9 +1,7 @@
 import { building } from '$app/environment';
-import { COOKIE_AUTH_TOKEN } from '$lib/common/constants';
+import { COOKIE_AUTH_TOKEN, PUBLIC_ROUTES } from '$lib/common/constants';
 import { getUserByToken } from '$lib/server';
 import { redirect, type Cookies, type Handle } from '@sveltejs/kit';
-
-const PUBLIC_ROUTES = ['/login', '/register'];
 
 export const handle: Handle = async ({ event, resolve }) => {
 	if (building) {

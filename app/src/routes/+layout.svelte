@@ -3,17 +3,53 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import type { Snippet } from 'svelte';
 	import Header from './Header.svelte';
+	import { beforeNavigate, goto } from '$app/navigation';
+	import { userRepository } from '$lib/dal/user';
+	import { PUBLIC_ROUTES } from '$lib/common/constants';
 
 	type Props = {
 		children: Snippet;
 	};
 
 	const { children }: Props = $props();
-	const queryClient = new QueryClient();
+	const queryClient = new QueryClient({
+		defaultOptions: {
+			queries: {
+				retry: 1,
+				staleTime: Infinity
+			}
+		}
+	});
+
+	let isRedirecting = $state(false);
+
+	beforeNavigate(async ({ cancel, to }) => {
+		if (!to || isRedirecting) {
+			return;
+		}
+
+		// We cancel first to prevent flickering
+		cancel();
+		isRedirecting = true;
+
+		try {
+			const pathname = to.url.pathname ?? '';
+			const user = await userRepository.getCurrentUser();
+
+			if (!user && !PUBLIC_ROUTES.some((p) => pathname.startsWith(p))) {
+				goto('/login');
+			} else {
+				goto(to.url.toString());
+			}
+		} finally {
+			isRedirecting = false;
+		}
+	});
 </script>
 
 <svelte:head>
 	<title>TodoApp</title>
+	<link rel="manifest" href="/manifest.json" />
 </svelte:head>
 
 <QueryClientProvider client={queryClient}>
