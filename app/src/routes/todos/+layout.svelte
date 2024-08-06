@@ -17,7 +17,7 @@
 			href="/todos"
 			class="font-bold text-2xl text-green-500 mt-5 pb-2 lg:hidden flex flex-row gap-2 w-full justify-center items-center"
 		>
-			<img src="/icons/todoapp.png" alt="logo" class="size-7" />
+			<img src="/todo-app.png" alt="logo" class="size-7" />
 			<span>TodoApp</span>
 		</a>
 		<div class="h-full overflow-y-auto">

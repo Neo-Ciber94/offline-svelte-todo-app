@@ -9,9 +9,34 @@
 	"display": "standalone",
 	"icons": [
 		{
-			"src": "icons/todoapp.png",
-			"type": "image/png",
-			"sizes": "96x96"
+			"src": "icons/todo-app-512x512.png",
+			"sizes": "512x512",
+			"purpose": "any"
+		},
+		{
+			"src": "icons/todo-app-192x192.png",
+			"sizes": "192x192",
+			"purpose": "any"
+		},
+		{
+			"src": "icons/todo-app-144x144.png",
+			"sizes": "144x144",
+			"purpose": "any"
+		},
+		{
+			"src": "icons/todo-app-96x96.png",
+			"sizes": "96x96",
+			"purpose": "any"
+		},
+		{
+			"src": "icons/todo-app-72x72.png",
+			"sizes": "72x72",
+			"purpose": "any"
+		},
+		{
+			"src": "icons/todo-app-48x48.png",
+			"sizes": "48x48",
+			"purpose": "any"
 		}
 	]
 }
