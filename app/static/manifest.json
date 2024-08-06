@@ -1,0 +1,17 @@
+{
+	"name": "TodoApp",
+	"short_name": "TodoApp",
+	"description": "A simple offline-first todo app",
+	"start_url": "/",
+	"scope": "/",
+	"background_color": "#F0FDF4",
+	"theme_color": "#22C55E",
+	"display": "standalone",
+	"icons": [
+		{
+			"src": "icons/todoapp.png",
+			"type": "image/png",
+			"sizes": "96x96"
+		}
+	]
+}
