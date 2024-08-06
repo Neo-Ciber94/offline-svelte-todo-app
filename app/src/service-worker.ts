@@ -12,7 +12,7 @@ const ASSETS = [...build, ...files, ...prerendered];
 worker.addEventListener('install', (event) => {
 	async function precacheOfflinePage() {
 		const cache = await caches.open(CACHE_KEY);
-		await cache.addAll(OFFLINE_URL);
+		await cache.add(OFFLINE_URL);
 	}
 
 	async function precacheAssets() {
