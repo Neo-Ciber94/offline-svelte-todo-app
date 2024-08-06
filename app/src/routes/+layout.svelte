@@ -37,9 +37,9 @@
 			const user = await userRepository.getCurrentUser();
 
 			if (!user && !PUBLIC_ROUTES.some((p) => pathname.startsWith(p))) {
-				goto('/login');
+				await goto('/login');
 			} else {
-				goto(to.url.toString());
+				await goto(to.url.toString());
 			}
 		} finally {
 			isRedirecting = false;
