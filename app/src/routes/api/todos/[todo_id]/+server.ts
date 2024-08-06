@@ -2,8 +2,8 @@ import { deleteTodo, getTodoById, updateTodo } from '$lib/server';
 import { error, isHttpError } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { customJson } from '$lib/server/helpers';
-import { z } from 'zod';
 import * as devalue from 'devalue';
+import { updateTodoSchema } from '$lib/data';
 
 export const GET: RequestHandler = async (event) => {
 	const result = await getTodoById(event.params.todo_id);
@@ -14,13 +14,6 @@ export const GET: RequestHandler = async (event) => {
 
 	return customJson(result);
 };
-
-const updateTodoSchema = z.object({
-	id: z.string(),
-	title: z.string().optional(),
-	description: z.string().optional(),
-	done: z.boolean().optional()
-});
 
 export const PUT: RequestHandler = async (event) => {
 	const user = event.locals.user;

@@ -1,23 +1,11 @@
-import { createIndexDb } from '$lib/client/idb-kv';
 import { ApplicationError } from '$lib/common/error';
-import type { Todo } from '$lib/data';
-import {
-	TodoRepositoryInterface,
-	type CreateTodo,
-	type GetAllTodos,
-	type UpdateTodo
-} from './todos.interface';
-import type { NetworkTodosRepository } from './todos.network';
-import type { UserRepositoryInterface } from './user';
-
-const { get, set } = createIndexDb('todos-db');
+import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
+import { db } from './local-db';
+import { TodoRepositoryInterface, type GetAllTodos } from './todos.interface';
+import { networkTodoRepository, type NetworkTodosRepository } from './todos.network';
+import { userRepository, type UserRepositoryInterface } from './user';
 
 const IS_LOCAL = Symbol('IS_LOCAL');
-
-async function getTodos() {
-	const todos = await get<Todo[]>('todos');
-	return todos || [];
-}
 
 export class LocalTodosRepository extends TodoRepositoryInterface {
 	constructor(
@@ -27,10 +15,14 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 		super();
 	}
 
-	async invalidate() {
+	async synchronize() {
 		try {
+			// Get all the todos over the network
 			const todos = await this.network.getAll();
-			await set('todos', todos);
+
+			// Cleanup the local cache and set the new todos
+			await db.stores.todos.deleteAll();
+			await db.stores.todos.setAll(todos);
 		} catch {
 			// ignore
 		}
@@ -49,7 +41,7 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 		}
 
 		const userId = user.id;
-		const todos = await getTodos();
+		const todos = await db.stores.todos.getAll();
 
 		return todos
 			.map((todo) => ({ ...todo }))
@@ -89,7 +81,7 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 	}
 
 	async getById(todoId: string): Promise<Todo | null> {
-		const todo = await getTodos().then((todos) => todos.find((todo) => todo.id === todoId));
+		const todo = await db.stores.todos.getByKey(todoId);
 		return todo ?? null;
 	}
 
@@ -112,9 +104,8 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 
 		Object.assign(newTodo, { [IS_LOCAL]: IS_LOCAL });
 
-		const todos = await getTodos();
-		todos.push(newTodo);
-		await set('todos', todos);
+		// Add the new todo
+		await db.stores.todos.set(newTodo);
 
 		return Object.assign({}, newTodo);
 	}
@@ -127,8 +118,7 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 		}
 
 		const userId = user.id;
-		const todos = await getTodos();
-		const todoToUpdate = todos.find((t) => t.id === input.id);
+		const todoToUpdate = await db.stores.todos.getByKey(input.id);
 
 		if (!todoToUpdate || todoToUpdate.userId !== userId) {
 			return null;
@@ -138,6 +128,8 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 		todoToUpdate.description =
 			input.description == null ? todoToUpdate.description : input.description;
 		todoToUpdate.done = input.done == null ? todoToUpdate.done : input.done;
+
+		await db.stores.todos.set(todoToUpdate);
 
 		return todoToUpdate;
 	}
@@ -150,21 +142,15 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 		}
 
 		const userId = user.id;
-		const todos = await getTodos();
-		const todoIdx = todos.findIndex((t) => t.id === todoId);
+		const todoToDelete = await db.stores.todos.getByKey(todoId);
 
-		if (todoIdx === -1) {
+		if (todoToDelete == null || todoToDelete.userId !== userId) {
 			return null;
 		}
 
-		const todoToDelete = todos[todoIdx];
-
-		if (todoToDelete.userId !== userId) {
-			return null;
-		}
-
-		todos.splice(todoIdx, 1);
-		await set('todos', todos);
+		await db.stores.todos.delete(todoId);
 		return todoToDelete;
 	}
 }
+
+export const localTodoRepository = new LocalTodosRepository(networkTodoRepository, userRepository);

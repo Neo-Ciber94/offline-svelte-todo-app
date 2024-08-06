@@ -1,13 +1,12 @@
-import type { Todo } from '$lib/data';
-import {
-	TodoRepositoryInterface,
-	type CreateTodo,
-	type GetAllTodos,
-	type UpdateTodo
-} from './todos.interface';
+import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
+import { TodoRepositoryInterface, type GetAllTodos } from './todos.interface';
 import * as devalue from 'devalue';
 
 export class NetworkTodosRepository extends TodoRepositoryInterface {
+	synchronize(): Promise<void> {
+		return Promise.resolve();
+	}
+
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
 		const { filter, sort } = query || {};
 		const searchParams = new URLSearchParams();
@@ -118,3 +117,5 @@ export class NetworkTodosRepository extends TodoRepositoryInterface {
 		return json as Todo;
 	}
 }
+
+export const networkTodoRepository = new NetworkTodosRepository();

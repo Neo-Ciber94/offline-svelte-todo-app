@@ -1,11 +1,11 @@
-import { createIndexDb } from '$lib/client/idb-kv';
 import type { Result } from '$lib/common';
 import { ApplicationError } from '$lib/common/error';
 import type { User } from '$lib/data';
-import { checkNetwork, NetworkService } from './network-service';
+import { db } from './local-db';
+import { networkService, NetworkService } from './network-service';
 import * as devalue from 'devalue';
 
-const { get, set, del } = createIndexDb('todos-db');
+const CURRENT_USER_KEY = 'current-user';
 
 export abstract class UserRepositoryInterface {
 	abstract getCurrentUser(): Promise<User | null>;
@@ -26,7 +26,7 @@ class UserRepository extends UserRepositoryInterface {
 		}
 
 		if (!this.networkService.isOnline()) {
-			const user = await get<User>('user');
+			const user = await db.stores.users.getByKey(CURRENT_USER_KEY);
 			return user ?? null;
 		}
 
@@ -38,7 +38,12 @@ class UserRepository extends UserRepositoryInterface {
 		}
 
 		const json = devalue.parse(contents) as User;
-		await set('user', json);
+		if (json == null) {
+			await db.stores.users.delete(CURRENT_USER_KEY);
+		} else {
+			await db.stores.users.setWithKey(CURRENT_USER_KEY, json);
+		}
+
 		return json;
 	}
 
@@ -67,7 +72,7 @@ class UserRepository extends UserRepositoryInterface {
 
 			{
 				this.#user = user;
-				await set('user', user);
+				await db.stores.users.setWithKey(CURRENT_USER_KEY, user);
 			}
 
 			return { success: true, data: user };
@@ -101,7 +106,7 @@ class UserRepository extends UserRepositoryInterface {
 
 			{
 				this.#user = user;
-				await set('user', user);
+				await db.stores.users.setWithKey(CURRENT_USER_KEY, user);
 			}
 
 			return { success: true, data: user };
@@ -116,10 +121,10 @@ class UserRepository extends UserRepositoryInterface {
 			throw new ApplicationError(400, 'Unable to logout while offline');
 		}
 
-		await del('user');
+		await db.stores.users.delete(CURRENT_USER_KEY);
 		this.#user = null;
 		location.href = `${location.origin}/api/users/logout`;
 	}
 }
 
-export const userRepository = new UserRepository(checkNetwork);
+export const userRepository = new UserRepository(networkService);

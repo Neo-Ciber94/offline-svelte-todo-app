@@ -3,6 +3,7 @@ import { customJson } from '$lib/server/helpers';
 import { error, isHttpError, type RequestHandler } from '@sveltejs/kit';
 import { z } from 'zod';
 import * as devalue from 'devalue';
+import { createTodoSchema } from '$lib/data';
 
 const getAllSchema = z.object({
 	done: z.coerce
@@ -47,11 +48,6 @@ export const GET: RequestHandler = async (event) => {
 	return customJson(result);
 };
 
-const todoSchema = z.object({
-	title: z.string(),
-	description: z.string().nullable()
-});
-
 export const POST: RequestHandler = async (event) => {
 	const user = event.locals.user;
 
@@ -63,7 +59,7 @@ export const POST: RequestHandler = async (event) => {
 
 	try {
 		const json = devalue.parse(contents);
-		const result = todoSchema.safeParse(json);
+		const result = createTodoSchema.safeParse(json);
 
 		if (!result.success) {
 			const message = result.error.issues

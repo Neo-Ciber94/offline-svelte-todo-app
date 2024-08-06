@@ -8,4 +8,4 @@ class BrowserCheckNetwork extends NetworkService {
 	}
 }
 
-export const checkNetwork = new BrowserCheckNetwork();
+export const networkService = new BrowserCheckNetwork();

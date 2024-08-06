@@ -1,4 +1,4 @@
-import type { Todo } from '$lib/data';
+import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
 
 export type GetAllTodos = {
 	filter?: {
@@ -11,19 +11,8 @@ export type GetAllTodos = {
 	};
 };
 
-export type CreateTodo = {
-	title: string;
-	description: string | null;
-};
-
-export type UpdateTodo = {
-	id: string;
-	title?: string;
-	description?: string;
-	done?: boolean;
-};
-
 export abstract class TodoRepositoryInterface {
+	abstract synchronize(): Promise<void>;
 	abstract getAll(query?: GetAllTodos): Promise<Todo[]>;
 	abstract getById(todoId: string): Promise<Todo | null>;
 	abstract insert(input: CreateTodo): Promise<Todo>;

@@ -3,7 +3,7 @@ import type { z, ZodType, ZodObject } from 'zod';
 
 type StoreDefinitionSchema<S extends ZodObject<any>> = {
 	schema: S;
-	keys: [keyof S, ...(keyof S)[]];
+	keys: (keyof S)[];
 };
 
 type DatabaseDefinition<S extends ZodObject<any>> = {
@@ -55,7 +55,7 @@ class DatabaseStore<T extends ZodObject<any>> {
 	async getByKey(key: string) {
 		const store = await this.#newTransaction('readonly');
 		const request = store.get([key]);
-		return new Promise<Entity<T>>((resolve, reject) => {
+		return new Promise<Entity<T> | undefined>((resolve, reject) => {
 			request.onsuccess = () => resolve(request.result);
 			request.onerror = () => reject(request.error);
 		});
@@ -70,6 +70,25 @@ class DatabaseStore<T extends ZodObject<any>> {
 		});
 	}
 
+	async getAllKeys() {
+		const store = await this.#newTransaction('readonly');
+		const request = store.getAllKeys();
+		return new Promise<IDBValidKey[]>((resolve, reject) => {
+			request.onsuccess = () => resolve(request.result);
+			request.onerror = () => reject(request.error);
+		});
+	}
+
+	async setWithKey(key: string, value: z.input<T>) {
+		const validatedValue = this.#schema.schema.parse(value);
+		const store = await this.#newTransaction('readwrite');
+		const request = store.put(validatedValue, key);
+		return new Promise<void>((resolve, reject) => {
+			request.onsuccess = () => resolve();
+			request.onerror = () => reject(request.error);
+		});
+	}
+
 	async set(value: z.input<T>) {
 		const validatedValue = this.#schema.schema.parse(value);
 		const store = await this.#newTransaction('readwrite');
@@ -80,6 +99,21 @@ class DatabaseStore<T extends ZodObject<any>> {
 		});
 	}
 
+	async setAll(values: z.input<T>[]) {
+		const validatedValues = values.map((x) => this.#schema.schema.parse(x));
+		const store = await this.#newTransaction('readwrite');
+		const requests = validatedValues.map((val) => store.put(val));
+
+		const promises = requests.map((req) => {
+			return new Promise<void>((resolve, reject) => {
+				req.onsuccess = () => resolve();
+				req.onerror = () => reject(req.error);
+			});
+		});
+
+		return Promise.all(promises);
+	}
+
 	async delete(key: string) {
 		const store = await this.#newTransaction('readwrite');
 		const request = store.delete([key]);
@@ -88,6 +122,20 @@ class DatabaseStore<T extends ZodObject<any>> {
 			request.onsuccess = () => resolve();
 			request.onerror = () => reject(request.error);
 		});
+	}
+
+	async deleteAll(...keys: string[]) {
+		const keysToDelete = keys.length > 0 ? keys : await this.getAllKeys();
+		const store = await this.#newTransaction('readwrite');
+		const requests = keysToDelete.map((key) => store.delete(key));
+		const promises = requests.map((req) => {
+			return new Promise<void>((resolve, reject) => {
+				req.onsuccess = () => resolve();
+				req.onerror = () => reject(req.error);
+			});
+		});
+
+		return Promise.all(promises);
 	}
 }
 
@@ -105,11 +153,12 @@ export class BrowserDatabase<TDefinition extends DatabaseDefinition<any>> {
 			dbRequest.onsuccess = () => resolve(dbRequest.result);
 			dbRequest.onerror = () => reject(dbRequest.error);
 			dbRequest.onupgradeneeded = () => {
-				for (const [storeName, schema] of Object.entries(definition)) {
-					const keyPath = schema.keys.map((s) => String(s));
+				for (const [storeName, storeDef] of Object.entries(definition)) {
+					const schema = storeDef.schema as ZodObject<any>;
+					const keyPath = storeDef.keys.map((s) => String(s));
 
 					keyPath.forEach((k) => {
-						if (schema.schema[k] == null) {
+						if (schema.shape[k] == null) {
 							throw new TypeError(
 								`Store schema '${storeName}' does not define a key '${k}' to be used as index`
 							);
@@ -119,14 +168,14 @@ export class BrowserDatabase<TDefinition extends DatabaseDefinition<any>> {
 					const idb = dbRequest.result;
 
 					idb.createObjectStore(storeName, {
-						keyPath: keyPath
+						keyPath: keyPath.length > 0 ? keyPath : undefined
 					});
 				}
 			};
 		});
 	}
 
-	get store() {
+	get stores() {
 		const indexDb = this.#indexDb;
 		const definition = this.#definition;
 
