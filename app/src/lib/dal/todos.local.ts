@@ -1,7 +1,7 @@
 import { ApplicationError } from '$lib/common/error';
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
 import { db } from './local-db';
-import type { NetworkService } from './network-service';
+import { networkService, type NetworkService } from './network-service';
 import { TodoRepositoryInterface, type GetAllTodos } from './todos.interface';
 import { networkTodoRepository, type NetworkTodosRepository } from './todos.network';
 import { userRepository, type UserRepositoryInterface } from './user';
@@ -159,4 +159,8 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 	}
 }
 
-export const localTodoRepository = new LocalTodosRepository(networkTodoRepository, userRepository);
+export const localTodoRepository = new LocalTodosRepository(
+	networkTodoRepository,
+	networkService,
+	userRepository
+);
