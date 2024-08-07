@@ -1,6 +1,7 @@
 import { ApplicationError } from '$lib/common/error';
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
 import { db } from './local-db';
+import type { NetworkService } from './network-service';
 import { TodoRepositoryInterface, type GetAllTodos } from './todos.interface';
 import { networkTodoRepository, type NetworkTodosRepository } from './todos.network';
 import { userRepository, type UserRepositoryInterface } from './user';
@@ -10,12 +11,17 @@ const IS_LOCAL = Symbol('IS_LOCAL');
 export class LocalTodosRepository extends TodoRepositoryInterface {
 	constructor(
 		private readonly network: NetworkTodosRepository,
+		private readonly networkService: NetworkService,
 		private readonly userRepository: UserRepositoryInterface
 	) {
 		super();
 	}
 
 	async synchronize() {
+		if (!this.networkService.isOnline()) {
+			return;
+		}
+
 		try {
 			// Get all the todos over the network
 			const todos = await this.network.getAll();
