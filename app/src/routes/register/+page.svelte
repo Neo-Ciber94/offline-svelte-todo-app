@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
 	import { userService } from '$lib/services/user.service';
 
 	let username = $state('');
@@ -13,10 +14,9 @@
 
 		if (result.success) {
 			await goto('/todos');
-			return;
+		} else {
+			error = result.error;
 		}
-
-		error = result.error;
 	}
 </script>
 
@@ -39,9 +39,7 @@
 		</p>
 
 		{#if error}
-			<p class="text-sm font-bold p-4 bg-red-200/90 text-red-700 rounded-md">
-				{error}
-			</p>
+			<ErrorAlert {error} />
 		{/if}
 	</form>
 </div>

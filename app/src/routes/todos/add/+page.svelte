@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { ApplicationError } from '$lib/common/error';
+	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
 	import { todoService } from '$lib/services/todo.service';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
@@ -61,9 +62,7 @@
 		</button>
 
 		{#if error}
-			<p class="text-sm font-bold p-4 bg-red-200/90 text-red-700 rounded-md">
-				{error}
-			</p>
+			<ErrorAlert {error} />
 		{/if}
 	</form>
 </div>
