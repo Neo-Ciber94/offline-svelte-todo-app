@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { pendingTodoSchema, todoSchema, userSchema } from '$lib/common/schema';
+import { pendingTodoSchema, todoSchema } from '$lib/common/schema';
 import { BrowserDatabase } from 'browser-idb';
 
 function createBrowserDb() {
@@ -10,10 +10,6 @@ function createBrowserDb() {
 				todos: {
 					keys: ['id'],
 					schema: todoSchema
-				},
-				users: {
-					keys: [],
-					schema: userSchema
 				},
 				pendingTodos: {
 					keys: ['id'],

@@ -1,4 +1,4 @@
-export function createIndexDb(dbName = 'idb-kv', storeName = 'idb-store') {
+export function createKvStore(dbName = 'idb-kv', storeName = 'idb-store') {
 	const db = new Promise<IDBDatabase>((resolve, reject) => {
 		if (typeof window === 'undefined') {
 			return;

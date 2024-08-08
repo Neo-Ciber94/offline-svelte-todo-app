@@ -1,11 +1,12 @@
 import type { Result } from '$lib/common/types';
-import type { User } from '$lib/common/schema';
+import { userSchema, type User } from '$lib/common/schema';
 import { ApplicationError } from '$lib/common/error';
-import { db } from './local-db';
 import { networkService, NetworkService } from './network-service';
 import * as devalue from 'devalue';
+import { createKvStore } from '$lib/client/idb-kv';
 
 const CURRENT_USER_KEY = 'current-user';
+const { set, del, get } = createKvStore();
 
 export abstract class UserServiceInterface {
 	abstract getCurrentUser(): Promise<User | null>;
@@ -26,8 +27,14 @@ class UserService extends UserServiceInterface {
 		}
 
 		if (!this.networkService.isOnline()) {
-			const user = await db.stores.users.getByKey(CURRENT_USER_KEY);
-			return user ?? null;
+			const raw = await get(CURRENT_USER_KEY);
+			const result = userSchema.safeParse(raw);
+
+			if (result.error) {
+				await del(CURRENT_USER_KEY);
+			}
+
+			return result.success ? result.data : null;
 		}
 
 		const res = await fetch('/api/users/me');
@@ -37,14 +44,14 @@ class UserService extends UserServiceInterface {
 			return null;
 		}
 
-		const json = devalue.parse(contents) as User;
-		if (json == null) {
-			await db.stores.users.delete(CURRENT_USER_KEY);
-		} else {
-			await db.stores.users.setWithKey(CURRENT_USER_KEY, json);
+		const result = userSchema.safeParse(devalue.parse(contents));
+
+		if (result.success) {
+			return result.data;
 		}
 
-		return json;
+		await del(CURRENT_USER_KEY);
+		return null;
 	}
 
 	async register(username: string): Promise<Result<User, string>> {
@@ -68,11 +75,10 @@ class UserService extends UserServiceInterface {
 				return { success: false, error };
 			}
 
-			const user = devalue.parse(contents) as User;
-
+			const user = userSchema.parse(devalue.parse(contents));
 			{
 				this.#user = user;
-				await db.stores.users.setWithKey(CURRENT_USER_KEY, user);
+				await set(CURRENT_USER_KEY, user);
 			}
 
 			return { success: true, data: user };
@@ -102,11 +108,10 @@ class UserService extends UserServiceInterface {
 				return { success: false, error };
 			}
 
-			const user = devalue.parse(contents) as User;
-
+			const user = userSchema.parse(devalue.parse(contents));
 			{
 				this.#user = user;
-				await db.stores.users.setWithKey(CURRENT_USER_KEY, user);
+				await set(CURRENT_USER_KEY, user);
 			}
 
 			return { success: true, data: user };
@@ -121,7 +126,7 @@ class UserService extends UserServiceInterface {
 			throw new ApplicationError(400, 'Unable to logout while offline');
 		}
 
-		await db.stores.users.delete(CURRENT_USER_KEY);
+		await del(CURRENT_USER_KEY);
 		this.#user = null;
 		location.href = `${location.origin}/api/users/logout`;
 	}
