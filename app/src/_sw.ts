@@ -1,7 +1,7 @@
 /// <reference types="@sveltejs/kit" />
 
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
-import { prerendered } from '$service-worker';
+// import { prerendered } from '$service-worker';
 import { registerRoute } from 'workbox-routing';
 import { NetworkOnly } from 'workbox-strategies';
 import { cacheNames } from 'workbox-core';
@@ -11,8 +11,10 @@ declare const __MANIFEST__: string[];
 
 const manifestAssets = __MANIFEST__;
 const revision = __VERSION__.toString();
+
+const files = manifestAssets.map((url) => ({ url, revision }));
 const ADDITIONAL_MANIFEST = [{ url: '/offline', revision }];
-const ASSETS = [...manifestAssets, ...ADDITIONAL_MANIFEST, ...prerendered];
+const ASSETS = [...files, ...ADDITIONAL_MANIFEST];
 
 console.log(manifestAssets);
 

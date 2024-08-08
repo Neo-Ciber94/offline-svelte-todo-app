@@ -1,12 +1,14 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
-import registerWorker from './vite/sw-plugin';
+import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		registerWorker({
-			filePath: 'src/service-worker.ts'
+		SvelteKitPWA({
+			devOptions: {
+				enabled: true
+			}
 		})
 	],
 	test: {

@@ -8,7 +8,8 @@
 	import { PUBLIC_ROUTES } from '$lib/common/constants';
 	import { pendingTodosQueue } from '$lib/dal/pending-todos-queue';
 	import { todosRepository } from '$lib/dal/todos';
-	
+	import { pwaInfo } from 'virtual:pwa-info';
+
 	type Props = {
 		children: Snippet;
 	};
@@ -23,7 +24,33 @@
 		}
 	});
 
+	// const webManifestLink = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
 	let isRedirecting = $state(false);
+
+	// $effect.pre(() => {
+	// 	if ('serviceWorker' in navigator) {
+	// 		navigator.serviceWorker.register('/service-worker.js', { type: 'module' });
+	// 	}
+	// });
+
+	$effect.pre(() => {
+		const run = async () => {
+			if (pwaInfo) {
+				const { registerSW } = await import('virtual:pwa-register');
+				registerSW({
+					immediate: true,
+					onRegisteredSW(scriptUrl) {
+						console.log(`SW Registered: ${scriptUrl}`);
+					},
+					onRegisterError(error) {
+						console.log('SW registration error', error);
+					}
+				});
+			}
+		};
+
+		run().catch(console.error);
+	});
 
 	beforeNavigate(async ({ cancel, to }) => {
 		if (!to || isRedirecting) {
@@ -74,6 +101,7 @@
 <svelte:head>
 	<title>TodoApp</title>
 	<link rel="manifest" href="/manifest.json" />
+	<!-- {@html webManifestLink} -->
 </svelte:head>
 
 <QueryClientProvider client={queryClient}>
