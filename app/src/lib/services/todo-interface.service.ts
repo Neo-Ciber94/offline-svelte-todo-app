@@ -1,4 +1,4 @@
-import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
+import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
 
 export type GetAllTodos = {
 	filter?: {

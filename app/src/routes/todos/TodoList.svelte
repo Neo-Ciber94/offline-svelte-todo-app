@@ -1,13 +1,13 @@
 <script lang="ts">
 	import Loading from '$lib/components/Loading.svelte';
-	import { todosRepository } from '$lib/dal/todos';
-	import type { Todo } from '$lib/data';
+	import { todoService } from '$lib/services/todo.service';
+	import type { Todo } from '$lib/common/schema';
 	import { createQuery } from '@tanstack/svelte-query';
 
 	const todosQuery = createQuery({
 		queryKey: ['todos'],
 		async queryFn() {
-			return todosRepository.getAll();
+			return todoService.getAll();
 		}
 	});
 </script>

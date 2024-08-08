@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { userRepository } from '$lib/dal/user';
+	import { userService } from '$lib/services/user.service';
 
 	let username = $state('');
 	let error = $state<string>();
@@ -9,7 +9,7 @@
 		ev.preventDefault();
 		error = undefined;
 
-		const result = await userRepository.register(username);
+		const result = await userService.register(username);
 
 		if (result.success) {
 			await goto('/todos');

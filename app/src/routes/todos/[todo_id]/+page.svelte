@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { storeToRune } from '$lib/client/storeToRune.svelte';
 	import Loading from '$lib/components/Loading.svelte';
-	import { todosRepository } from '$lib/dal/todos';
+	import { todoService } from '$lib/services/todo.service';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 	const todoId = $derived($page.params.todo_id);
@@ -14,13 +14,13 @@
 		storeToRune(() => ({
 			queryKey: ['todos', todoId],
 			async queryFn() {
-				return todosRepository.getById(todoId);
+				return todoService.getById(todoId);
 			}
 		}))
 	);
 
 	async function handleCompleteTodo() {
-		await todosRepository.update({
+		await todoService.update({
 			id: todoId,
 			done: true
 		});
@@ -38,7 +38,7 @@
 		isMutating = true;
 
 		try {
-			await todosRepository.delete(todoId);
+			await todoService.delete(todoId);
 			queryClient.invalidateQueries();
 			await goto('/todos');
 		} finally {

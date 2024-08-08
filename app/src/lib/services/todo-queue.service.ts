@@ -1,4 +1,4 @@
-import type { PendingTodo } from '$lib/data';
+import type { PendingTodo } from '$lib/common/schema';
 import { db } from './local-db';
 import { networkService, type NetworkService } from './network-service';
 import { networkTodoService, type NetworkTodoService } from './todo-network.service';

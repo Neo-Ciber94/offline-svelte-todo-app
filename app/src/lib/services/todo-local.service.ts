@@ -1,5 +1,5 @@
 import { ApplicationError } from '$lib/common/error';
-import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
+import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
 import { db } from './local-db';
 import { networkService, type NetworkService } from './network-service';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';

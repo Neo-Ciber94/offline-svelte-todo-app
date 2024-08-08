@@ -3,7 +3,7 @@ import { customJson } from '$lib/server/helpers';
 import { error, isHttpError, type RequestHandler } from '@sveltejs/kit';
 import { z } from 'zod';
 import * as devalue from 'devalue';
-import { createTodoSchema } from '$lib/data';
+import { createTodoSchema } from '$lib/common/schema';
 
 const getAllSchema = z.object({
 	done: z.coerce

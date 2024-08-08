@@ -1,4 +1,4 @@
-import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
+import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import * as devalue from 'devalue';
 

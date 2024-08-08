@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Loading from '$lib/components/Loading.svelte';
-	import { userRepository } from '$lib/dal/user';
+	import { userService } from '$lib/services/user.service';
 	import { createQuery } from '@tanstack/svelte-query';
 
 	const userQuery = createQuery({
 		queryKey: ['user'],
 		queryFn() {
-			return userRepository.getCurrentUser();
+			return userService.getCurrentUser();
 		}
 	});
 </script>

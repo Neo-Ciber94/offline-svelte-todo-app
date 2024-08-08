@@ -3,7 +3,7 @@ import { error, isHttpError } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { customJson } from '$lib/server/helpers';
 import * as devalue from 'devalue';
-import { updateTodoSchema } from '$lib/data';
+import { updateTodoSchema } from '$lib/common/schema';
 
 export const GET: RequestHandler = async (event) => {
 	const result = await getTodoById(event.params.todo_id);

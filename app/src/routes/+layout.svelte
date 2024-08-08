@@ -4,10 +4,10 @@
 	import type { Snippet } from 'svelte';
 	import Header from './Header.svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { userRepository } from '$lib/dal/user';
+	import { userService } from '$lib/services/user.service';
 	import { PUBLIC_ROUTES } from '$lib/common/constants';
-	import { pendingTodosQueue } from '$lib/dal/pending-todos-queue';
-	import { todosRepository } from '$lib/dal/todos';
+	import { todoQueueService } from '$lib/services/todo-queue.service';
+	import { todoService } from '$lib/services/todo.service';
 	import { pwaInfo } from 'virtual:pwa-info';
 
 	type Props = {
@@ -63,7 +63,7 @@
 
 		try {
 			const pathname = to.url.pathname ?? '';
-			const user = await userRepository.getCurrentUser();
+			const user = await userService.getCurrentUser();
 
 			if (!user && !PUBLIC_ROUTES.some((p) => pathname.startsWith(p))) {
 				await goto('/login');
@@ -76,7 +76,7 @@
 	});
 
 	$effect.pre(() => {
-		todosRepository.synchronize().catch(console.error);
+		todoService.synchronize().catch(console.error);
 	});
 
 	$effect.pre(() => {
@@ -85,7 +85,7 @@
 				return;
 			}
 
-			await pendingTodosQueue.runPending();
+			await todoQueueService.runPending();
 		}
 
 		// First run

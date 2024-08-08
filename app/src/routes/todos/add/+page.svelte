@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { ApplicationError } from '$lib/common/error';
-	import { todosRepository } from '$lib/dal/todos';
+	import { todoService } from '$lib/services/todo.service';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	let title = $state('');
@@ -16,7 +16,7 @@
 		isMutating = true;
 
 		try {
-			const result = await todosRepository.insert({
+			const result = await todoService.insert({
 				title,
 				description
 			});

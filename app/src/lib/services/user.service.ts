@@ -1,6 +1,6 @@
-import type { Result } from '$lib/common';
+import type { Result } from '$lib/common/types';
+import type { User } from '$lib/common/schema';
 import { ApplicationError } from '$lib/common/error';
-import type { User } from '$lib/data';
 import { db } from './local-db';
 import { networkService, NetworkService } from './network-service';
 import * as devalue from 'devalue';
