@@ -9,9 +9,6 @@ export default defineConfig({
 			filePath: 'src/service-worker.ts'
 		})
 	],
-	define: {
-		__VERSION__: Date.now().toString()
-	},
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	}

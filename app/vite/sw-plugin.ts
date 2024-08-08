@@ -9,7 +9,7 @@ type Options = {
 	outDir?: string;
 };
 
-export default async function serviceWorker(options: Options): Promise<Plugin> {
+export default async function registerWorker(options: Options): Promise<Plugin> {
 	const { cwd = process.cwd(), filePath, outDir } = options;
 	const inputSwFile = path.join(cwd, filePath);
 	const fileName = path.parse(inputSwFile).name;
@@ -24,37 +24,38 @@ export default async function serviceWorker(options: Options): Promise<Plugin> {
 		enforce: 'post',
 		apply: 'build',
 		async transform(code, id) {
-			// if (!id.includes(fileName)) {
-			// 	return;
-			// }
-			// const result = await esbuild.transform(code, {
-			// 	define: {
-			// 		__MANIFEST__: JSON.stringify([]),
-			// 		__VERSION__: Date.now().toString(),
-			// 	}
-			// });
-			// if (id.includes('service-worker')) {
-			// 	console.log({ id });
-			// }
-			// return result;
+			if (!id.includes(fileName)) {
+				return;
+			}
+			const result = await esbuild.transform(code, {
+				define: {
+					__MANIFEST__: JSON.stringify(assetsFiles),
+					__VERSION__: Date.now().toString()
+				}
+			});
+
+			return result;
 		},
 		async generateBundle(_, bundle) {
 			const assets = Object.keys(bundle);
 			assetsFiles.push(...assets);
 		},
+
 		closeBundle: {
 			sequential: true,
-
+			order: 'post',
 			async handler() {
 				const viteConfig = await resolveConfig({}, 'build');
-				if (viteConfig.build.ssr) {
+				const viteOutDir = normalizePath(viteConfig.build.outDir);
+
+				if (!viteConfig.build.ssr) {
 					return;
 				}
 
-				const viteOutDir = normalizePath(viteConfig.build.outDir);
-				const swOutDir = outDir ?? viteOutDir;
-				console.log({ inputSwFile, swOutDir, assetsFiles });
-				esbuild.build({
+				const baseViteOutDir = path.dirname(viteOutDir);
+				const swOutDir = outDir ?? normalizePath(path.join(baseViteOutDir, 'client'));
+
+				await esbuild.build({
 					entryPoints: [inputSwFile],
 					outdir: swOutDir,
 					minify: false,
