@@ -1,15 +1,17 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
-import serviceWorker from './vite/sw-plugin';
+import registerWorker from './vite/sw-plugin';
 
 export default defineConfig({
 	plugins: [
 		sveltekit(),
-		serviceWorker({
-			filePath: 'src/service-worker.ts',
-			outDir: 'out'
+		registerWorker({
+			filePath: 'src/service-worker.ts'
 		})
 	],
+	define: {
+		__VERSION__: Date.now().toString()
+	},
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	}

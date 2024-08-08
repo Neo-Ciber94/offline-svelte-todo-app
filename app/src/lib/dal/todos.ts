@@ -27,7 +27,10 @@ class TodoRepository extends TodoRepositoryInterface {
 
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
 		if (!this.networkService.isOnline()) {
-			return this.local.getAll(query);
+			console.log('get cache');
+			const result = await this.local.getAll(query);
+			console.log(result);
+			return result;
 		}
 
 		return this.network.getAll(query);
@@ -55,7 +58,6 @@ class TodoRepository extends TodoRepositoryInterface {
 		await this.local.insert(input);
 
 		const result = await this.network.insert(input);
-		this.synchronize().catch(console.error);
 		return result;
 	}
 
@@ -72,7 +74,6 @@ class TodoRepository extends TodoRepositoryInterface {
 		await this.local.update(input);
 
 		const result = await this.network.update(input);
-		this.synchronize().catch(console.error);
 		return result;
 	}
 
@@ -89,8 +90,13 @@ class TodoRepository extends TodoRepositoryInterface {
 		await this.local.delete(todoId);
 
 		const result = await this.network.delete(todoId);
-		this.synchronize().catch(console.error);
 		return result;
+	}
+}
+
+class NoConnection extends NetworkService {
+	isOnline(): boolean {
+		return false;
 	}
 }
 

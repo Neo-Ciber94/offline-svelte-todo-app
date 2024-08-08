@@ -1,101 +1,45 @@
-/// <reference lib="webworker" />
 /// <reference types="@sveltejs/kit" />
 
-// import { build, prerendered, files, version } from '$service-worker';
-// import { files, version } from '$assets-manifest';
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
+import { prerendered } from '$service-worker';
+import { registerRoute } from 'workbox-routing';
+import { NetworkOnly } from 'workbox-strategies';
+import { cacheNames } from 'workbox-core';
 
-declare const __FILES__: string;
 declare const __VERSION__: number;
+declare const __MANIFEST__: string[];
 
-const files = __FILES__;
-const version = __VERSION__;
-const worker = self as unknown as ServiceWorkerGlobalScope;
+const manifestAssets = __MANIFEST__;
+const revision = __VERSION__.toString();
+const ADDITIONAL_MANIFEST = [{ url: '/offline', revision }];
+const ASSETS = [...manifestAssets, ...ADDITIONAL_MANIFEST, ...prerendered];
 
-const CACHE_KEY = `cache-v${version}`;
-const OFFLINE_URL = '/offline';
-const ASSETS = files; //[...build, ...files, ...prerendered];
+console.log(manifestAssets);
 
-worker.addEventListener('install', (event) => {
-	async function precacheOfflinePage() {
-		const cache = await caches.open(CACHE_KEY);
-		await cache.add(OFFLINE_URL);
+cleanupOutdatedCaches();
+precacheAndRoute(ASSETS);
+
+// Custom handler to return the offline page if network request fails
+const offlineFallbackHandler = async ({ event }) => {
+	try {
+		// Attempt to fetch the resource from the network
+		const response = await fetch(event.request);
+		return response;
+	} catch {
+		// If network request fails, return the offline page from cache
+		const cache = await caches.open(cacheNames.precache);
+		return cache.match('/offline');
 	}
+};
 
-	async function precacheAssets() {
-		// Add the static files to the cache
-		const cache = await caches.open(CACHE_KEY);
-		await cache.addAll(ASSETS);
-	}
-
-	event.waitUntil(Promise.all([precacheOfflinePage(), precacheAssets()]));
-});
-
-worker.addEventListener('activate', (event) => {
-	async function deleteOldCaches() {
-		// Delete old caches
-		const keys = await caches.keys();
-
-		for (const key of keys) {
-			if (key !== CACHE_KEY) {
-				await caches.delete(key);
+// Register route for navigation requests with offline fallback
+registerRoute(
+	({ request }) => request.mode === 'navigate',
+	new NetworkOnly({
+		plugins: [
+			{
+				handlerDidError: offlineFallbackHandler
 			}
-		}
-	}
-
-	event.waitUntil(deleteOldCaches());
-});
-
-// @ts-expect-error FetchEvent is valid
-// https://web.dev/articles/offline-fallback-page#the_service_worker_code
-self.addEventListener('fetch', (event: FetchEvent) => {
-	if (event.request.method !== 'GET') {
-		return;
-	}
-
-	async function respond() {
-		const url = new URL(event.request.url);
-		const cache = await caches.open(CACHE_KEY);
-
-		// Static pages try to load its js from the '_app/immutable',
-		// we attend to get the response from there
-		if (url.pathname.includes('_app/immutable')) {
-			const idx = url.pathname.indexOf('_app/immutable');
-			const pathname = url.pathname.slice(idx);
-			const matchResponse = await cache.match(pathname);
-
-			console.log(`Matched? ${pathname}? ${matchResponse != null}`);
-			if (matchResponse) {
-				return matchResponse;
-			}
-		}
-
-		try {
-			// First, try to use the navigation preload response if it's supported.
-			const preloadResponse = await event.preloadResponse;
-			if (preloadResponse) {
-				return preloadResponse;
-			}
-
-			// Always try the network first.
-			const networkResponse = await fetch(event.request);
-			return networkResponse;
-		} catch (error) {
-			const matchResponse = await cache.match(event.request);
-
-			if (matchResponse) {
-				return matchResponse;
-			}
-
-			// catch is only triggered if an exception is thrown, which is
-			// likely due to a network error.
-			// If fetch() returns a valid HTTP response with a response code in
-			// the 4xx or 5xx range, the catch() will NOT be called.
-			console.log('Fetch failed; returning offline page instead.', error);
-
-			const cachedResponse = await cache.match(OFFLINE_URL);
-			return cachedResponse;
-		}
-	}
-
-	event.respondWith(respond());
-});
+		]
+	})
+);

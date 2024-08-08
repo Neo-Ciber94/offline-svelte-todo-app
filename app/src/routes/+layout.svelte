@@ -8,7 +8,7 @@
 	import { PUBLIC_ROUTES } from '$lib/common/constants';
 	import { pendingTodosQueue } from '$lib/dal/pending-todos-queue';
 	import { todosRepository } from '$lib/dal/todos';
-
+	
 	type Props = {
 		children: Snippet;
 	};
