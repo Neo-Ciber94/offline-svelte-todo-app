@@ -42,6 +42,28 @@
 		run().catch(console.error);
 	});
 
+	$effect.pre(() => {
+		todoService.synchronize().catch(console.error);
+	});
+
+	$effect.pre(() => {
+		async function runPendingTodos() {
+			if (!navigator.onLine) {
+				return;
+			}
+
+			await todoQueueService.runPending();
+		}
+
+		// First run
+		runPendingTodos();
+
+		window.addEventListener('online', runPendingTodos);
+		return () => {
+			window.addEventListener('online', runPendingTodos);
+		};
+	});
+
 	beforeNavigate(async ({ cancel, to }) => {
 		if (!to || isRedirecting) {
 			return;
@@ -63,28 +85,6 @@
 		} finally {
 			isRedirecting = false;
 		}
-	});
-
-	$effect.pre(() => {
-		todoService.synchronize().catch(console.error);
-	});
-
-	$effect.pre(() => {
-		async function runPendingTodos() {
-			if (!navigator.onLine) {
-				return;
-			}
-
-			await todoQueueService.runPending();
-		}
-
-		// First run
-		runPendingTodos();
-
-		window.addEventListener('online', runPendingTodos);
-		return () => {
-			window.addEventListener('online', runPendingTodos);
-		};
 	});
 </script>
 
