@@ -9,8 +9,8 @@ import { localTodoService, LocalTodoService } from './todo-local.service';
 import { networkTodoService, NetworkTodoService } from './todo-network.service';
 import { todoQueueService, type TodoQueueService } from './todo-queue.service';
 
-@LogMethodCalls
-class TodoRepository extends TodoServiceInterface {
+@LogMethodCalls('TodoService')
+class TodoService extends TodoServiceInterface {
 	constructor(
 		private readonly networkService: NetworkService,
 		private readonly local: LocalTodoService,
@@ -99,7 +99,7 @@ class TodoRepository extends TodoServiceInterface {
 	}
 }
 
-export const todoService = new TodoRepository(
+export const todoService = new TodoService(
 	networkService,
 	localTodoService,
 	networkTodoService,

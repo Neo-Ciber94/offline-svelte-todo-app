@@ -3,7 +3,7 @@ import { LogMethodCalls } from '$lib/decorators';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import * as devalue from 'devalue';
 
-@LogMethodCalls
+@LogMethodCalls('NetworkTodoService')
 class NetworkTodoService extends TodoServiceInterface {
 	synchronize(): Promise<void> {
 		return Promise.resolve();

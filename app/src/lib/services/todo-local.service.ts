@@ -7,7 +7,7 @@ import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service
 import { networkTodoService, type NetworkTodoService } from './todo-network.service';
 import { userService, type UserServiceInterface } from './user.service';
 
-@LogMethodCalls
+@LogMethodCalls('LocalTodoService')
 class LocalTodoService extends TodoServiceInterface {
 	constructor(
 		private readonly network: NetworkTodoService,
