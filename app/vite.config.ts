@@ -6,6 +6,9 @@ export default defineConfig({
 	plugins: [
 		sveltekit(),
 		SvelteKitPWA({
+			workbox: {
+				navigateFallback: '/offline'
+			},
 			devOptions: {
 				enabled: true
 			}
