@@ -6,11 +6,17 @@ export default defineConfig({
 	plugins: [
 		sveltekit(),
 		SvelteKitPWA({
+			strategies: 'injectManifest',
+			srcDir: 'src',
+			filename: 'service-worker.ts',
+			scope: '/',
 			workbox: {
 				navigateFallback: '/offline'
 			},
 			devOptions: {
-				enabled: true
+				enabled: true,
+				navigateFallback: '/offline',
+				type: 'module'
 			}
 		})
 	],

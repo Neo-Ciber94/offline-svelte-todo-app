@@ -1,8 +1,10 @@
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
+import { LogMethodCalls } from '$lib/decorators';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import * as devalue from 'devalue';
 
-export class NetworkTodoService extends TodoServiceInterface {
+@LogMethodCalls
+class NetworkTodoService extends TodoServiceInterface {
 	synchronize(): Promise<void> {
 		return Promise.resolve();
 	}
@@ -117,5 +119,7 @@ export class NetworkTodoService extends TodoServiceInterface {
 		return json as Todo;
 	}
 }
+
+export { NetworkTodoService };
 
 export const networkTodoService = new NetworkTodoService();

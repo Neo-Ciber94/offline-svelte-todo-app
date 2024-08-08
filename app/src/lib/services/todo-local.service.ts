@@ -1,12 +1,14 @@
 import { ApplicationError } from '$lib/common/error';
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
+import { LogMethodCalls } from '$lib/decorators';
 import { db } from './local-db';
 import { networkService, type NetworkService } from './network-service';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import { networkTodoService, type NetworkTodoService } from './todo-network.service';
 import { userService, type UserServiceInterface } from './user.service';
 
-export class LocalTodoService extends TodoServiceInterface {
+@LogMethodCalls
+class LocalTodoService extends TodoServiceInterface {
 	constructor(
 		private readonly network: NetworkTodoService,
 		private readonly networkService: NetworkService,
@@ -154,6 +156,8 @@ export class LocalTodoService extends TodoServiceInterface {
 		return todoToDelete;
 	}
 }
+
+export { LocalTodoService };
 
 export const localTodoService = new LocalTodoService(
 	networkTodoService,

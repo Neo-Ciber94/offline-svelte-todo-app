@@ -1,4 +1,5 @@
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
+import { LogMethodCalls } from '$lib/decorators';
 import { networkService, NetworkService } from './network-service';
 import {
 	TodoServiceInterface as TodoServiceInterface,
@@ -8,6 +9,7 @@ import { localTodoService, LocalTodoService } from './todo-local.service';
 import { networkTodoService, NetworkTodoService } from './todo-network.service';
 import { todoQueueService, type TodoQueueService } from './todo-queue.service';
 
+@LogMethodCalls
 class TodoRepository extends TodoServiceInterface {
 	constructor(
 		private readonly networkService: NetworkService,

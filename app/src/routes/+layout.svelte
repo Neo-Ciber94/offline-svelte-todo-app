@@ -8,7 +8,6 @@
 	import { PUBLIC_ROUTES } from '$lib/common/constants';
 	import { todoQueueService } from '$lib/services/todo-queue.service';
 	import { todoService } from '$lib/services/todo.service';
-	import { pwaInfo } from 'virtual:pwa-info';
 
 	type Props = {
 		children: Snippet;
@@ -24,29 +23,20 @@
 		}
 	});
 
-	// const webManifestLink = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
 	let isRedirecting = $state(false);
-
-	// $effect.pre(() => {
-	// 	if ('serviceWorker' in navigator) {
-	// 		navigator.serviceWorker.register('/service-worker.js', { type: 'module' });
-	// 	}
-	// });
 
 	$effect.pre(() => {
 		const run = async () => {
-			if (pwaInfo) {
-				const { registerSW } = await import('virtual:pwa-register');
-				registerSW({
-					immediate: true,
-					onRegisteredSW(scriptUrl) {
-						console.log(`SW Registered: ${scriptUrl}`);
-					},
-					onRegisterError(error) {
-						console.log('SW registration error', error);
-					}
-				});
-			}
+			const { registerSW } = await import('virtual:pwa-register');
+			registerSW({
+				immediate: true,
+				onRegisteredSW(scriptUrl) {
+					console.log(`SW Registered: ${scriptUrl}`);
+				},
+				onRegisterError(error) {
+					console.log('SW registration error', error);
+				}
+			});
 		};
 
 		run().catch(console.error);
@@ -101,7 +91,6 @@
 <svelte:head>
 	<title>TodoApp</title>
 	<link rel="manifest" href="/manifest.json" />
-	<!-- {@html webManifestLink} -->
 </svelte:head>
 
 <QueryClientProvider client={queryClient}>
