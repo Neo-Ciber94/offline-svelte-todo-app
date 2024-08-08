@@ -1,5 +1,5 @@
 import { ApplicationError } from '$lib/common/error';
-import type { CreateTodo, GetAllTodos, UpdateTodo } from '$lib/dal/todos.interface';
+import type { CreateTodo, GetAllTodos, UpdateTodo } from '$lib/services/todo-interface.service';
 import type { Todo, User } from '$lib/data';
 
 const TODOS = new Map<string, Todo>();

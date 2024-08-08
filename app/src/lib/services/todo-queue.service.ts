@@ -1,17 +1,17 @@
 import type { PendingTodo } from '$lib/data';
 import { db } from './local-db';
 import { networkService, type NetworkService } from './network-service';
-import { networkTodoRepository, type NetworkTodosRepository } from './todos.network';
+import { networkTodoService, type NetworkTodoService } from './todo-network.service';
 
-export abstract class PendingTodosQueue {
+export abstract class TodoQueueService {
 	abstract enqueue(pending: PendingTodo): Promise<void>;
 	abstract runPending(): Promise<number>;
 }
 
-class LocalPendingTodosQueue extends PendingTodosQueue {
+class LocalTodoQueueService extends TodoQueueService {
 	constructor(
 		private readonly networkService: NetworkService,
-		private readonly networkTodos: NetworkTodosRepository
+		private readonly networkTodos: NetworkTodoService
 	) {
 		super();
 	}
@@ -78,7 +78,7 @@ class LocalPendingTodosQueue extends PendingTodosQueue {
 	}
 }
 
-export const pendingTodosQueue: PendingTodosQueue = new LocalPendingTodosQueue(
+export const todoQueueService: TodoQueueService = new LocalTodoQueueService(
 	networkService,
-	networkTodoRepository
+	networkTodoService
 );

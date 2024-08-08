@@ -2,17 +2,15 @@ import { ApplicationError } from '$lib/common/error';
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
 import { db } from './local-db';
 import { networkService, type NetworkService } from './network-service';
-import { TodoRepositoryInterface, type GetAllTodos } from './todos.interface';
-import { networkTodoRepository, type NetworkTodosRepository } from './todos.network';
-import { userRepository, type UserRepositoryInterface } from './user';
+import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
+import { networkTodoService, type NetworkTodoService } from './todo-network.service';
+import { userService, type UserServiceInterface } from './user.service';
 
-const IS_LOCAL = Symbol('IS_LOCAL');
-
-export class LocalTodosRepository extends TodoRepositoryInterface {
+export class LocalTodoService extends TodoServiceInterface {
 	constructor(
-		private readonly network: NetworkTodosRepository,
+		private readonly network: NetworkTodoService,
 		private readonly networkService: NetworkService,
-		private readonly userRepository: UserRepositoryInterface
+		private readonly userRepository: UserServiceInterface
 	) {
 		super();
 	}
@@ -108,8 +106,6 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 			createdAt: new Date()
 		};
 
-		Object.assign(newTodo, { [IS_LOCAL]: IS_LOCAL });
-
 		// Add the new todo
 		await db.stores.todos.set(newTodo);
 
@@ -159,8 +155,8 @@ export class LocalTodosRepository extends TodoRepositoryInterface {
 	}
 }
 
-export const localTodoRepository = new LocalTodosRepository(
-	networkTodoRepository,
+export const localTodoService = new LocalTodoService(
+	networkTodoService,
 	networkService,
-	userRepository
+	userService
 );

@@ -7,13 +7,13 @@ import * as devalue from 'devalue';
 
 const CURRENT_USER_KEY = 'current-user';
 
-export abstract class UserRepositoryInterface {
+export abstract class UserServiceInterface {
 	abstract getCurrentUser(): Promise<User | null>;
 	abstract register(username: string): Promise<Result<User, string>>;
 	abstract logout(): Promise<void>;
 }
 
-class UserRepository extends UserRepositoryInterface {
+class UserService extends UserServiceInterface {
 	#user: User | null | undefined = undefined;
 
 	constructor(private readonly networkService: NetworkService) {
@@ -127,4 +127,4 @@ class UserRepository extends UserRepositoryInterface {
 	}
 }
 
-export const userRepository = new UserRepository(networkService);
+export const userService = new UserService(networkService);

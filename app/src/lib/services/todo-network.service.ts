@@ -1,8 +1,8 @@
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
-import { TodoRepositoryInterface, type GetAllTodos } from './todos.interface';
+import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import * as devalue from 'devalue';
 
-export class NetworkTodosRepository extends TodoRepositoryInterface {
+export class NetworkTodoService extends TodoServiceInterface {
 	synchronize(): Promise<void> {
 		return Promise.resolve();
 	}
@@ -118,4 +118,4 @@ export class NetworkTodosRepository extends TodoRepositoryInterface {
 	}
 }
 
-export const networkTodoRepository = new NetworkTodosRepository();
+export const networkTodoService = new NetworkTodoService();

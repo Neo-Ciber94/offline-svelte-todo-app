@@ -1,16 +1,19 @@
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/data';
 import { networkService, NetworkService } from './network-service';
-import { TodoRepositoryInterface, type GetAllTodos } from './todos.interface';
-import { localTodoRepository, LocalTodosRepository } from './todos.local';
-import { networkTodoRepository, NetworkTodosRepository } from './todos.network';
-import { pendingTodosQueue, type PendingTodosQueue } from './pending-todos-queue';
+import {
+	TodoServiceInterface as TodoServiceInterface,
+	type GetAllTodos
+} from './todo-interface.service';
+import { localTodoService, LocalTodoService } from './todo-local.service';
+import { networkTodoService, NetworkTodoService } from './todo-network.service';
+import { todoQueueService, type TodoQueueService } from './todo-queue.service';
 
-class TodoRepository extends TodoRepositoryInterface {
+class TodoRepository extends TodoServiceInterface {
 	constructor(
 		private readonly networkService: NetworkService,
-		private readonly local: LocalTodosRepository,
-		private readonly network: NetworkTodosRepository,
-		private readonly pendingQueue: PendingTodosQueue
+		private readonly local: LocalTodoService,
+		private readonly network: NetworkTodoService,
+		private readonly pendingQueue: TodoQueueService
 	) {
 		super();
 	}
@@ -94,15 +97,9 @@ class TodoRepository extends TodoRepositoryInterface {
 	}
 }
 
-class NoConnection extends NetworkService {
-	isOnline(): boolean {
-		return false;
-	}
-}
-
-export const todosRepository = new TodoRepository(
+export const todoService = new TodoRepository(
 	networkService,
-	localTodoRepository,
-	networkTodoRepository,
-	pendingTodosQueue
+	localTodoService,
+	networkTodoService,
+	todoQueueService
 );
