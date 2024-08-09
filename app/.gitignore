@@ -7,6 +7,7 @@ node_modules
 /build
 /dist
 /out
+/data/database.db
 
 # Dev
 dev-dist

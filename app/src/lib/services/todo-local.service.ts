@@ -1,5 +1,6 @@
 import { ApplicationError } from '$lib/common/error';
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
+import { applyTodosQuery } from '$lib/common/todo.utils';
 import { LogMethodCalls } from '$lib/decorators';
 import { db } from './local-db';
 import { networkService, type NetworkService } from './network-service';
@@ -35,11 +36,6 @@ class LocalTodoService extends TodoServiceInterface {
 	}
 
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
-		const { filter, sort } = query || {};
-		const search = filter?.search?.toLowerCase();
-		const orderBy = sort?.by || 'createdAt';
-		const orderDir = sort?.dir || 'desc';
-
 		const user = await this.userRepository.getCurrentUser();
 
 		if (!user) {
@@ -49,41 +45,7 @@ class LocalTodoService extends TodoServiceInterface {
 		const userId = user.id;
 		const todos = await db.stores.todos.getAll();
 
-		return todos
-			.map((todo) => ({ ...todo }))
-			.filter((todo) => todo.userId === userId)
-			.filter((todo) => {
-				return typeof filter?.done === 'boolean' ? todo.done === filter.done : true;
-			})
-			.filter((todo) => {
-				if (search == null) {
-					return true;
-				}
-
-				return (
-					todo.title.toLowerCase().includes(search) ||
-					todo.description?.toLowerCase().includes(search)
-				);
-			})
-			.sort((a, b) => {
-				switch (true) {
-					case orderBy === 'title' && orderDir === 'desc': {
-						return a.title.localeCompare(b.title);
-					}
-					case orderBy === 'title' && orderDir === 'asc': {
-						return b.title.localeCompare(b.title);
-					}
-					case orderBy === 'createdAt' && orderDir === 'desc': {
-						return a.createdAt.getTime() - b.createdAt.getTime();
-					}
-					case orderBy === 'createdAt' && orderDir === 'asc': {
-						return b.createdAt.getTime() - a.createdAt.getTime();
-					}
-					default: {
-						return 0;
-					}
-				}
-			});
+		return applyTodosQuery(todos, userId, query);
 	}
 
 	async getById(todoId: string): Promise<Todo | null> {

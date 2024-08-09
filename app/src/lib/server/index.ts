@@ -1,61 +1,40 @@
 import { ApplicationError } from '$lib/common/error';
 import type { CreateTodo, Todo, UpdateTodo, User } from '$lib/common/schema';
+import { applyTodosQuery } from '$lib/common/todo.utils';
 import type { GetAllTodos } from '$lib/services/todo-interface.service';
+import { db } from './db';
 
-const TODOS = new Map<string, Todo>();
-const USERS = new Map<string, User>();
+type TodoModel = {
+	id: string;
+	user_id: string;
+	title: string;
+	description: string | null;
+	done: boolean;
+	created_at: number;
+};
+
+type UserModel = {
+	id: string;
+	username: string;
+	created_at: Date;
+};
 
 export async function getTodos(userId: string, query?: GetAllTodos) {
-	const { filter, sort } = query || {};
-	const search = filter?.search?.toLowerCase();
-	const orderBy = sort?.by || 'createdAt';
-	const orderDir = sort?.dir || 'desc';
+	const todos = await db
+		.all<TodoModel[]>('SELECT * FROM todo WHERE user_id = ?', [userId])
+		.then((result) => result.map(mapTodo));
 
-	return Array.from(TODOS.values())
-		.map((todo) => ({ ...todo }))
-		.filter((todo) => todo.userId === userId)
-		.filter((todo) => {
-			return typeof filter?.done === 'boolean' ? todo.done === filter.done : true;
-		})
-		.filter((todo) => {
-			if (search == null) {
-				return true;
-			}
-
-			return (
-				todo.title.toLowerCase().includes(search) ||
-				todo.description?.toLowerCase().includes(search)
-			);
-		})
-		.sort((a, b) => {
-			switch (true) {
-				case orderBy === 'title' && orderDir === 'desc': {
-					return a.title.localeCompare(b.title);
-				}
-				case orderBy === 'title' && orderDir === 'asc': {
-					return b.title.localeCompare(b.title);
-				}
-				case orderBy === 'createdAt' && orderDir === 'desc': {
-					return a.createdAt.getTime() - b.createdAt.getTime();
-				}
-				case orderBy === 'createdAt' && orderDir === 'asc': {
-					return b.createdAt.getTime() - a.createdAt.getTime();
-				}
-				default: {
-					return 0;
-				}
-			}
-		});
+	return applyTodosQuery(todos, userId, query);
 }
 
 export async function getTodoById(todoId: string) {
-	const todo = TODOS.get(todoId);
+	const todo = await db.get<TodoModel>('SELECT * FROM todo WHERE id = ?', [todoId]);
 
 	if (!todo) {
 		return null;
 	}
 
-	return Object.assign({}, todo);
+	return mapTodo(todo);
 }
 
 export async function createTodo(userId: string, input: CreateTodo) {
@@ -68,46 +47,69 @@ export async function createTodo(userId: string, input: CreateTodo) {
 		done: false
 	};
 
-	TODOS.set(newTodo.id, newTodo);
+	await db.run('INSERT INTO todo VALUES(:id, :user_id, :title, :description, :done, :created_at)', {
+		':id': newTodo.id,
+		':user_id': newTodo.userId,
+		':title': newTodo.title,
+		':description': newTodo.description,
+		':done': Number(newTodo.done),
+		':created_at': newTodo.createdAt.getTime()
+	});
+
 	return newTodo;
 }
 
 export async function updateTodo(userId: string, input: UpdateTodo) {
-	const todoToUpdate = TODOS.get(input.id);
+	const todoToUpdate = await db.get<TodoModel>('SELECT * FROM todo WHERE id = ? AND user_id = ?', [
+		input.id,
+		userId
+	]);
 
 	if (!todoToUpdate) {
 		return null;
 	}
 
-	if (todoToUpdate.userId !== userId) {
+	if (todoToUpdate.user_id !== userId) {
 		return null;
 	}
 
-	todoToUpdate.title = input.title == null ? todoToUpdate.title : input.title;
-	todoToUpdate.description =
-		input.description == null ? todoToUpdate.description : input.description;
-	todoToUpdate.done = input.done == null ? todoToUpdate.done : input.done;
+	await db.run(
+		`UPDATE todo 
+			SET 
+				title = :title,
+				description = :description,
+				done = :done
+			WHERE id = :id AND :user_id = :user_id
+		`,
+		{
+			':id': input.id,
+			':user_id': userId,
+			':title': input.title == null ? todoToUpdate.title : input.title,
+			':description': input.description == null ? todoToUpdate.description : input.description,
+			':done': input.done == null ? Number(todoToUpdate.done) : Number(input.done)
+		}
+	);
 
-	return Object.assign({}, todoToUpdate);
+	return mapTodo(todoToUpdate);
 }
 
 export async function deleteTodo(userId: string, todoId: string) {
-	const todoToDelete = TODOS.get(todoId);
+	const deleted = await db.get<TodoModel>(
+		'DELETE FROM todo WHERE id = ? AND WHERE user_id = ? RETURNING *',
+		[todoId, userId]
+	);
 
-	if (!todoToDelete) {
+	if (!deleted) {
 		return null;
 	}
 
-	if (todoToDelete.userId !== userId) {
-		return null;
-	}
-
-	TODOS.delete(todoId);
-	return todoToDelete;
+	return mapTodo(deleted);
 }
 
 export async function registerUser(username: string) {
-	const alreadyExists = Array.from(USERS.values()).some((user) => user.username === username);
+	const alreadyExists = await db
+		.get<{ count: number }>('SELECT COUNT(*) as count FROM user WHERE username = ?', [username])
+		.then((result) => Boolean(result?.count));
 
 	if (alreadyExists) {
 		throw new ApplicationError(400, 'User already exists');
@@ -119,28 +121,33 @@ export async function registerUser(username: string) {
 		username
 	};
 
-	USERS.set(user.id, user);
-	return Object.assign({}, user);
+	await db.run('INSERT INTO user VALUES (:id, :username, :created_at)', {
+		':id': user.id,
+		':username': user.username,
+		':created_at': user.createdAt.getTime()
+	});
+
+	return user;
 }
 
 export async function getUser(userId: string) {
-	const user = USERS.get(userId);
+	const user = await db.get<UserModel>('SELECT * FROM user WHERE id = ?', [userId]);
 
 	if (!user) {
 		return null;
 	}
 
-	return Object.assign({}, user);
+	return mapUser(user);
 }
 
 export async function getUserByUsername(username: string) {
-	const user = Array.from(USERS.values()).find((user) => user.username === username);
+	const user = await db.get<UserModel>('SELECT * FROM user WHERE username = ?', [username]);
 
 	if (!user) {
 		return null;
 	}
 
-	return Object.assign({}, user);
+	return mapUser(user);
 }
 
 export async function generateUserToken(user: User) {
@@ -152,4 +159,23 @@ export async function getUserByToken(authToken: string) {
 	const userId = atob(authToken);
 	const user = await getUser(userId);
 	return user;
+}
+
+function mapTodo(model: TodoModel): Todo {
+	return {
+		id: model.id,
+		userId: model.user_id,
+		description: model.description,
+		done: Boolean(model.done),
+		title: model.title,
+		createdAt: new Date(model.created_at)
+	};
+}
+
+function mapUser(model: UserModel): User {
+	return {
+		id: model.id,
+		username: model.username,
+		createdAt: new Date(model.created_at)
+	};
 }
