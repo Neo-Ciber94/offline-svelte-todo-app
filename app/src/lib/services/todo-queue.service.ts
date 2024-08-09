@@ -1,20 +1,17 @@
 import type { PendingTodo } from '$lib/common/schema';
+import { inject } from './di';
 import { db } from './local-db';
-import { networkService, type NetworkService } from './network-service';
-import { networkTodoService, type NetworkTodoService } from './todo-network.service';
+import { NetworkServiceInterface } from './network-service';
+import { NetworkTodoService } from './todo-network.service';
 
-export abstract class TodoQueueService {
+export abstract class TodoQueueServiceInterface {
 	abstract enqueue(pending: PendingTodo): Promise<void>;
 	abstract runPending(): Promise<number>;
 }
 
-class LocalTodoQueueService extends TodoQueueService {
-	constructor(
-		private readonly networkService: NetworkService,
-		private readonly networkTodos: NetworkTodoService
-	) {
-		super();
-	}
+export class TodoQueueService extends TodoQueueServiceInterface {
+	private networkService = inject(NetworkServiceInterface);
+	private networkTodos = inject(NetworkTodoService);
 
 	async enqueue(pending: PendingTodo): Promise<void> {
 		console.log('🕒 Pending todo: ', pending);
@@ -77,8 +74,3 @@ class LocalTodoQueueService extends TodoQueueService {
 		return pendingCount;
 	}
 }
-
-export const todoQueueService: TodoQueueService = new LocalTodoQueueService(
-	networkService,
-	networkTodoService
-);

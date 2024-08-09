@@ -1,25 +1,23 @@
 import type { Result } from '$lib/common/types';
 import { userSchema, type User } from '$lib/common/schema';
 import { ApplicationError } from '$lib/common/error';
-import { networkService, NetworkService } from './network-service';
+import { NetworkServiceInterface } from './network-service';
 import * as devalue from 'devalue';
 import { createKvStore } from '$lib/client/idb-kv';
+import { inject } from './di';
 
 const CURRENT_USER_KEY = 'current-user';
 const { set, del, get } = createKvStore();
 
-export abstract class UserServiceInterface {
+abstract class UserServiceInterface {
 	abstract getCurrentUser(): Promise<User | null>;
 	abstract register(username: string): Promise<Result<User, string>>;
 	abstract logout(): Promise<void>;
 }
 
-class UserService extends UserServiceInterface {
+export class UserService extends UserServiceInterface {
+	private networkService = inject(NetworkServiceInterface);
 	#user: User | null | undefined = undefined;
-
-	constructor(private readonly networkService: NetworkService) {
-		super();
-	}
 
 	async getCurrentUser(): Promise<User | null> {
 		if (this.#user !== undefined) {
@@ -131,5 +129,3 @@ class UserService extends UserServiceInterface {
 		location.href = `${location.origin}/api/users/logout`;
 	}
 }
-
-export const userService = new UserService(networkService);

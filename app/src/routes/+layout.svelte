@@ -4,16 +4,22 @@
 	import type { Snippet } from 'svelte';
 	import Header from './Header.svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { userService } from '$lib/services/user.service';
 	import { PUBLIC_ROUTES } from '$lib/common/constants';
-	import { todoQueueService } from '$lib/services/todo-queue.service';
-	import { todoService } from '$lib/services/todo.service';
+	import { inject } from '$lib/services/di';
+	import { TodoService } from '$lib/services/todo.service';
+	import { UserService } from '$lib/services/user.service';
+	import { TodoQueueService } from '$lib/services/todo-queue.service';
 
 	type Props = {
 		children: Snippet;
 	};
 
 	const { children }: Props = $props();
+
+	const todoService = inject(TodoService);
+	const userService = inject(UserService);
+	const todoQueueService = inject(TodoQueueService);
+
 	const queryClient = new QueryClient({
 		defaultOptions: {
 			queries: {

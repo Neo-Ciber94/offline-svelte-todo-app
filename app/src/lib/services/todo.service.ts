@@ -1,24 +1,16 @@
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
-import { LogMethodCalls } from '$lib/decorators';
-import { networkService, NetworkService } from './network-service';
-import {
-	TodoServiceInterface as TodoServiceInterface,
-	type GetAllTodos
-} from './todo-interface.service';
-import { localTodoService, LocalTodoService } from './todo-local.service';
-import { networkTodoService, NetworkTodoService } from './todo-network.service';
-import { todoQueueService, type TodoQueueService } from './todo-queue.service';
+import { inject } from './di';
+import { NetworkServiceInterface } from './network-service';
+import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
+import { LocalTodoService } from './todo-local.service';
+import { NetworkTodoService } from './todo-network.service';
+import { TodoQueueService } from './todo-queue.service';
 
-@LogMethodCalls('TodoService')
-class TodoService extends TodoServiceInterface {
-	constructor(
-		private readonly networkService: NetworkService,
-		private readonly local: LocalTodoService,
-		private readonly network: NetworkTodoService,
-		private readonly pendingQueue: TodoQueueService
-	) {
-		super();
-	}
+export class TodoService extends TodoServiceInterface {
+	private readonly networkService = inject(NetworkServiceInterface);
+	private readonly local = inject(LocalTodoService);
+	private readonly network = inject(NetworkTodoService);
+	private readonly pendingQueue = inject(TodoQueueService);
 
 	async synchronize() {
 		await this.local.synchronize();
@@ -96,10 +88,3 @@ class TodoService extends TodoServiceInterface {
 		return result;
 	}
 }
-
-export const todoService = new TodoService(
-	networkService,
-	localTodoService,
-	networkTodoService,
-	todoQueueService
-);

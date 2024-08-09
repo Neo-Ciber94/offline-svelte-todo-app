@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
-	import { userService } from '$lib/services/user.service';
+	import { inject } from '$lib/services/di';
+	import { UserService } from '$lib/services/user.service';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
+	const userService = inject(UserService);
 	const queryClient = useQueryClient();
+
 	let username = $state('');
 	let error = $state<string>();
 

@@ -5,9 +5,11 @@
 	import { storeToRune } from '$lib/client/storeToRune.svelte';
 	import { ApplicationError } from '$lib/common/error';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
-	import { todoService } from '$lib/services/todo.service';
+	import { inject } from '$lib/services/di';
+	import { TodoService } from '$lib/services/todo.service';
 	import { createQuery, useQueryClient, type CreateQueryOptions } from '@tanstack/svelte-query';
 
+	const todoService = inject(TodoService);
 	const queryClient = useQueryClient();
 	const todoId = $derived($page.params.todo_id);
 

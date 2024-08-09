@@ -1,11 +1,9 @@
-export abstract class NetworkService {
+export abstract class NetworkServiceInterface {
 	abstract isOnline(): boolean;
 }
 
-class BrowserCheckNetwork extends NetworkService {
+export class NetworkService extends NetworkServiceInterface {
 	isOnline(): boolean {
 		return navigator.onLine;
 	}
 }
-
-export const networkService = new BrowserCheckNetwork();

@@ -1,22 +1,18 @@
 import { ApplicationError } from '$lib/common/error';
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
 import { applyTodosQuery } from '$lib/common/todo.utils';
-import { LogMethodCalls } from '$lib/decorators';
+import { inject } from './di';
 import { db } from './local-db';
-import { networkService, type NetworkService } from './network-service';
+import { NetworkServiceInterface } from './network-service';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
-import { networkTodoService, type NetworkTodoService } from './todo-network.service';
-import { userService, type UserServiceInterface } from './user.service';
+import { NetworkTodoService } from './todo-network.service';
+import { UserService } from './user.service';
 
-@LogMethodCalls('LocalTodoService')
-class LocalTodoService extends TodoServiceInterface {
-	constructor(
-		private readonly network: NetworkTodoService,
-		private readonly networkService: NetworkService,
-		private readonly userRepository: UserServiceInterface
-	) {
-		super();
-	}
+
+export class LocalTodoService extends TodoServiceInterface {
+	private userService = inject(UserService);
+	private networkService = inject(NetworkServiceInterface);
+	private networkTodoService = inject(NetworkTodoService);
 
 	async synchronize() {
 		if (!this.networkService.isOnline()) {
@@ -25,7 +21,7 @@ class LocalTodoService extends TodoServiceInterface {
 
 		try {
 			// Get all the todos over the network
-			const todos = await this.network.getAll();
+			const todos = await this.networkTodoService.getAll();
 
 			// Cleanup the local cache and set the new todos
 			await db.stores.todos.deleteAll();
@@ -36,7 +32,7 @@ class LocalTodoService extends TodoServiceInterface {
 	}
 
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
-		const user = await this.userRepository.getCurrentUser();
+		const user = await this.userService.getCurrentUser();
 
 		if (!user) {
 			return [];
@@ -54,7 +50,7 @@ class LocalTodoService extends TodoServiceInterface {
 	}
 
 	async insert(input: CreateTodo): Promise<Todo> {
-		const user = await this.userRepository.getCurrentUser();
+		const user = await this.userService.getCurrentUser();
 
 		if (!user) {
 			throw new ApplicationError(400, 'Failed to get current user');
@@ -77,7 +73,7 @@ class LocalTodoService extends TodoServiceInterface {
 	}
 
 	async update(input: UpdateTodo): Promise<Todo | null> {
-		const user = await this.userRepository.getCurrentUser();
+		const user = await this.userService.getCurrentUser();
 
 		if (!user) {
 			throw new Error('Failed to get current user');
@@ -101,7 +97,7 @@ class LocalTodoService extends TodoServiceInterface {
 	}
 
 	async delete(todoId: string): Promise<Todo | null> {
-		const user = await this.userRepository.getCurrentUser();
+		const user = await this.userService.getCurrentUser();
 
 		if (!user) {
 			throw new Error('Failed to get current user');
@@ -118,11 +114,3 @@ class LocalTodoService extends TodoServiceInterface {
 		return todoToDelete;
 	}
 }
-
-export { LocalTodoService };
-
-export const localTodoService = new LocalTodoService(
-	networkTodoService,
-	networkService,
-	userService
-);

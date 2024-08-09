@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { queryKeys } from '$lib/client/query-keys';
 	import Loading from '$lib/components/Loading.svelte';
-	import { userService } from '$lib/services/user.service';
+	import { inject } from '$lib/services/di';
+	import { UserService } from '$lib/services/user.service';
 	import { createQuery } from '@tanstack/svelte-query';
 
+	const userService = inject(UserService);
+	
 	const userQuery = createQuery({
 		queryKey: queryKeys.users.me(),
 		queryFn() {

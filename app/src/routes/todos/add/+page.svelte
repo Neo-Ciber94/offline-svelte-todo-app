@@ -2,13 +2,16 @@
 	import { goto } from '$app/navigation';
 	import { ApplicationError } from '$lib/common/error';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
-	import { todoService } from '$lib/services/todo.service';
+	import { inject } from '$lib/services/di';
+	import { TodoService } from '$lib/services/todo.service';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	let title = $state('');
 	let description = $state('');
 	let isMutating = $state(false);
 	let error = $state<string>();
+
+	const todoService = inject(TodoService);
 	const queryClient = useQueryClient();
 
 	async function handleAddTodo(ev: SubmitEvent) {

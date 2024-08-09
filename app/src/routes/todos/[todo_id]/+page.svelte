@@ -4,10 +4,12 @@
 	import { queryKeys } from '$lib/client/query-keys';
 	import { storeToRune } from '$lib/client/storeToRune.svelte';
 	import Loading from '$lib/components/Loading.svelte';
-	import { todoService } from '$lib/services/todo.service';
+	import { inject } from '$lib/services/di';
+	import { TodoService } from '$lib/services/todo.service';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 	const todoId = $derived($page.params.todo_id);
+	const todoService = inject(TodoService);
 	const queryClient = useQueryClient();
 	let isMutating = $state(false);
 

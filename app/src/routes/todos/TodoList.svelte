@@ -1,9 +1,12 @@
 <script lang="ts">
 	import Loading from '$lib/components/Loading.svelte';
-	import { todoService } from '$lib/services/todo.service';
 	import type { Todo } from '$lib/common/schema';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { queryKeys } from '$lib/client/query-keys';
+	import { inject } from '$lib/services/di';
+	import { TodoService } from '$lib/services/todo.service';
+
+	const todoService = inject(TodoService);
 
 	const todosQuery = createQuery({
 		queryKey: queryKeys.todos.all(),
