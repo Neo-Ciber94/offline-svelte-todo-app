@@ -1,8 +1,16 @@
 <script lang="ts">
+	import { useMediaQuery } from '$lib/runes/use-media-query.svelte';
 	import { useSidebar } from '$lib/runes/use-sidebar.svelte';
 	import TodoList from './todos/TodoList.svelte';
 
 	const sidebar = useSidebar();
+	const isLargeScreen = useMediaQuery('(min-width: 1024px)');
+
+	$effect(() => {
+		if (isLargeScreen.matching) {
+			sidebar.isOpen = true;
+		}
+	});
 </script>
 
 <aside
