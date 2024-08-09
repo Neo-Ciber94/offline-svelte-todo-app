@@ -32,9 +32,7 @@ class TodoService extends TodoServiceInterface {
 
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
 		if (!this.networkService.isOnline()) {
-			console.log('get cache');
 			const result = await this.local.getAll(query);
-			console.log(result);
 			return result;
 		}
 
