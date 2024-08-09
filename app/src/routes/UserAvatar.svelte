@@ -30,9 +30,9 @@
 		<div
 			class="bg-neutral-200 flex flex-row gap-2 items-center pl-5 pr-2 py-1 shadow border border-neutral-300 rounded-lg"
 		>
-			<span>{$userQuery.data.username}</span>
+			<span class="text-ellipsis">{$userQuery.data.username}</span>
 			<div
-				class="overflow-hidden size-6 sm:size-8 rounded-full bg-blue-600 text-white font-bold text-xs sm:text-base font-mono flex flex-row items-center justify-center shadow border"
+				class="overflow-hidden size-8 rounded-full bg-blue-600 text-white font-bold text-base font-mono flex flex-row items-center justify-center shadow border"
 			>
 				{initials}
 			</div>
