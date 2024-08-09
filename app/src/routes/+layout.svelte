@@ -9,6 +9,7 @@
 	import { TodoService } from '$lib/services/todo.service';
 	import { UserService } from '$lib/services/user.service';
 	import { TodoQueueService } from '$lib/services/todo-queue.service';
+	import ConnectivityIndicator from './ConnectivityIndicator.svelte';
 
 	type Props = {
 		children: Snippet;
@@ -103,3 +104,5 @@
 	<Header />
 	{@render children()}
 </QueryClientProvider>
+
+<ConnectivityIndicator />
