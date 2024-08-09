@@ -32,7 +32,7 @@
 		>
 			<span>{$userQuery.data.username}</span>
 			<div
-				class="overflow-hidden size-7 sm:size-10 rounded-full bg-blue-600 text-white font-bold text-sm sm:text-lg font-mono flex flex-row items-center justify-center shadow border"
+				class="overflow-hidden size-6 sm:size-8 rounded-full bg-blue-600 text-white font-bold text-xs sm:text-base font-mono flex flex-row items-center justify-center shadow border"
 			>
 				{initials}
 			</div>
