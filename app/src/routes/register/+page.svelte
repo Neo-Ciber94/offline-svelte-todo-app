@@ -2,7 +2,9 @@
 	import { goto } from '$app/navigation';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
 	import { userService } from '$lib/services/user.service';
+	import { useQueryClient } from '@tanstack/svelte-query';
 
+	const queryClient = useQueryClient();
 	let username = $state('');
 	let error = $state<string>();
 
@@ -13,6 +15,7 @@
 		const result = await userService.register(username);
 
 		if (result.success) {
+			await queryClient.invalidateQueries();
 			await goto('/todos');
 		} else {
 			error = result.error;

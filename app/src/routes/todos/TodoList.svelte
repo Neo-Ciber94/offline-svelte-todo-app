@@ -3,9 +3,10 @@
 	import { todoService } from '$lib/services/todo.service';
 	import type { Todo } from '$lib/common/schema';
 	import { createQuery } from '@tanstack/svelte-query';
+	import { queryKeys } from '$lib/client/query-keys';
 
 	const todosQuery = createQuery({
-		queryKey: ['todos'],
+		queryKey: queryKeys.todos.all(),
 		async queryFn() {
 			return todoService.getAll();
 		}

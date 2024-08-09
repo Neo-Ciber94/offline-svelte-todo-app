@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { queryKeys } from '$lib/client/query-keys';
 	import { storeToRune } from '$lib/client/storeToRune.svelte';
 	import Loading from '$lib/components/Loading.svelte';
 	import { todoService } from '$lib/services/todo.service';
@@ -12,7 +13,7 @@
 
 	const todoQuery = createQuery(
 		storeToRune(() => ({
-			queryKey: ['todos', todoId],
+			queryKey: queryKeys.todos.one(todoId),
 			async queryFn() {
 				return todoService.getById(todoId);
 			}

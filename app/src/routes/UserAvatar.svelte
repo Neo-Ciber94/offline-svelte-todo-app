@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { queryKeys } from '$lib/client/query-keys';
 	import Loading from '$lib/components/Loading.svelte';
 	import { userService } from '$lib/services/user.service';
 	import { createQuery } from '@tanstack/svelte-query';
 
 	const userQuery = createQuery({
-		queryKey: ['user'],
+		queryKey: queryKeys.users.me(),
 		queryFn() {
 			return userService.getCurrentUser();
 		}
@@ -17,7 +18,11 @@
 	{@const initials = $userQuery.data.username.toUpperCase().slice(0, 2)}
 
 	<div class="flex flex-row items-center gap-2">
-		<a class="px-5 py-2 rounded-md shadow bg-black text-white" href="/api/users/logout">Logout</a>
+		<a
+			data-sveltekit-preload-data="false"
+			class="px-5 py-2 rounded-md shadow bg-black text-white"
+			href="/api/users/logout">Logout</a
+		>
 
 		<div
 			class="bg-neutral-200 flex flex-row gap-2 items-center pl-5 pr-2 py-1 shadow border border-neutral-300 rounded-lg"
