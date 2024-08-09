@@ -15,7 +15,7 @@
 
 <aside
 	data-open={sidebar.isOpen}
-	class={`fixed top-0 left-0 h-full lg:relative shrink-0 sm:w-[400px] w-full border-r border-neutral-200 bg-white shadow z-10 lg:z-auto
+	class={`fixed top-0 left-0 h-full lg:relative shrink-0 sm:w-[400px] w-full border-r border-neutral-200 bg-black shadow z-10 lg:z-auto
 data-[open=false]:-translate-x-full data-[open=true]:translate-x-0 transition-all duration-500`}
 >
 	<a
@@ -27,7 +27,7 @@ data-[open=false]:-translate-x-full data-[open=true]:translate-x-0 transition-al
 	</a>
 
 	<button
-		class="text-neutral-600 absolute top-2 right-2 lg:hidden block"
+		class="text-green-300 absolute top-2 right-2 lg:hidden block"
 		onclick={() => {
 			sidebar.isOpen = false;
 		}}
