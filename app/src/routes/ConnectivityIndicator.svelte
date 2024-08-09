@@ -9,7 +9,7 @@
 	data-show={show}
 	data-is-online={online.isOnline}
 	onclick={() => (show = !show)}
-	class={`py-2 px-8 rounded-md shadow-md font-bold fixed bottom-2 right-2 bg-white/50 border cursor-pointer
+	class={`py-2 px-8 rounded-md shadow-md font-bold fixed bottom-2 right-2 bg-white border cursor-pointer
 	data-[show=true]:opacity-100 data-[show=false]:opacity-20 transition-all duration-300
 	data-[is-online=true]:text-green-500 data-[is-online=false]:text-red-500
 	data-[is-online=true]:border-green-500/50 data-[is-online=false]:border-red-500/50`}

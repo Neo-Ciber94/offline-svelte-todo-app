@@ -2,6 +2,7 @@
 	import { useMediaQuery } from '$lib/runes/use-media-query.svelte';
 	import { useSidebar } from '$lib/runes/use-sidebar.svelte';
 	import TodoList from './todos/TodoList.svelte';
+	import { fade } from 'svelte/transition';
 
 	const sidebar = useSidebar();
 	const isLargeScreen = useMediaQuery('(min-width: 1024px)');
@@ -13,9 +14,19 @@
 	});
 </script>
 
+{#if sidebar.isOpen}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		onclick={() => (sidebar.isOpen = false)}
+		transition:fade={{ duration: 300 }}
+		class="fixed block lg:hidden w-screen h-screen bg-black/80 top-0 left-0 backdrop-blur-sm"
+	></div>
+{/if}
+
 <aside
 	data-open={sidebar.isOpen}
-	class={`fixed top-0 left-0 h-full lg:relative shrink-0 sm:w-[400px] w-full border-r border-neutral-200 bg-black shadow z-10 lg:z-auto
+	class={`fixed top-0 left-0 h-full lg:relative shrink-0 sm:w-[400px] w-full border-r border-green-800 bg-black shadow z-10 lg:z-auto
 data-[open=false]:-translate-x-full data-[open=true]:translate-x-0 transition-all duration-500`}
 >
 	<a

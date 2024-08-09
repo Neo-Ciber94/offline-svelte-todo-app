@@ -13,9 +13,7 @@
 	const todosQuery = createQuery({
 		queryKey: queryKeys.todos.all(),
 		async queryFn() {
-			const result = await todoService.getAll();
-			// return Array(100).fill(result[1]);
-			return result;
+			return todoService.getAll();
 		}
 	});
 </script>
@@ -51,13 +49,13 @@
 		Add Todo
 	</a>
 
-	<div class="w-full h-full overflow-y-auto flex flex-col gap-2">
+	<div class="w-full h-full overflow-y-auto flex flex-col gap-2 pr-2">
 		{#if $todosQuery.isLoading}
 			<div class="w-full flex flex-row justify-center">
-				<Loading class="size-6" />
+				<Loading class="size-6 text-green-300" />
 			</div>
 		{:else if $todosQuery.data}
-			{#each $todosQuery.data as todo}
+			{#each $todosQuery.data as todo (todo.id)}
 				{@render TodoItem(todo)}
 			{:else}
 				<h3 class="w-full text-center font-bold text-lg text-green-200 my-2">No todos</h3>

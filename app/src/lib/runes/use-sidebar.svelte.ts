@@ -6,7 +6,6 @@ export function useSidebar() {
 			return isSidebarOpen;
 		},
 		set isOpen(value: boolean) {
-			console.log({ value });
 			isSidebarOpen = value;
 		}
 	};
