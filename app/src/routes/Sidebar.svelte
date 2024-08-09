@@ -7,21 +7,18 @@
 	const sidebar = useSidebar();
 	const isLargeScreen = useMediaQuery('(min-width: 1024px)');
 
-	$effect(() => {
-		if (isLargeScreen.matching) {
-			sidebar.isOpen = true;
-		}
+	$effect.pre(() => {
+		sidebar.isOpen = isLargeScreen.matching;
 	});
 </script>
 
 {#if sidebar.isOpen}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		onclick={() => (sidebar.isOpen = false)}
 		transition:fade={{ duration: 300 }}
 		class="fixed block lg:hidden w-screen h-screen bg-black/80 top-0 left-0 backdrop-blur-sm"
-	></div>
+	>
+		<button class="w-full h-full" onclick={() => (sidebar.isOpen = false)}> </button>
+	</div>
 {/if}
 
 <aside
