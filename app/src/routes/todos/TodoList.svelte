@@ -21,23 +21,26 @@
 {#snippet TodoItem(todo: Todo)}
 	<a
 		data-selected={todoId === todo.id}
-		class="shadow shadow-green-700 border-green-500 flex flex-col gap-1 rounded-md border p-2 hover:bg-green-900 data-[selected=true]:bg-green-900 cursor-pointer text-white"
+		class="shadow shadow-neutral-700 border-neutral-500 flex flex-row gap-2 rounded-md items-center border p-2 hover:bg-neutral-700 data-[selected=true]:bg-neutral-700 cursor-pointer text-white"
 		href={`/todos/${todo.id}`}
 	>
-		<h3
-			data-done={todo.done}
-			class="font-bold data-[done=true]:line-through data-[done=true]:opacity-70"
-		>
-			{todo.title}
-		</h3>
-		{#if todo.description}
-			<p
+		<span class="text-2xl px-2">{todo.emoji}</span>
+		<div class="flex flex-col gap-1">
+			<h3
 				data-done={todo.done}
-				class="text-sm data-[done=true]:line-through data-[done=true]:opacity-70 whitespace-nowrap overflow-hidden text-ellipsis"
+				class="font-bold data-[done=true]:line-through data-[done=true]:opacity-70"
 			>
-				{todo.description}
-			</p>
-		{/if}
+				{todo.title}
+			</h3>
+			{#if todo.description}
+				<p
+					data-done={todo.done}
+					class="text-sm data-[done=true]:line-through data-[done=true]:opacity-70 whitespace-nowrap overflow-hidden text-ellipsis"
+				>
+					{todo.description}
+				</p>
+			{/if}
+		</div>
 	</a>
 {/snippet}
 

@@ -1,13 +1,23 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { EMOJIS } from '$lib/common/emojis';
 	import { ApplicationError } from '$lib/common/error';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
+	import SelectEmoji from '$lib/components/SelectEmoji.svelte';
 	import { inject } from '$lib/services/di';
 	import { TodoService } from '$lib/services/todo.service';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
+	const getInitialEmoji = () => {
+		const idx = Math.floor(Math.random() * EMOJIS.length);
+		return EMOJIS[idx];
+	};
+
 	let title = $state('');
 	let description = $state('');
+	let emoji = $state<string>(getInitialEmoji()?.value);
+
+	// states
 	let isMutating = $state(false);
 	let error = $state<string>();
 
@@ -22,6 +32,7 @@
 		try {
 			const result = await todoService.insert({
 				title,
+				emoji,
 				description
 			});
 
@@ -49,6 +60,7 @@
 			placeholder="Title"
 			required
 		/>
+		<SelectEmoji bind:emoji />
 		<textarea
 			disabled={isMutating}
 			bind:value={description}

@@ -6,7 +6,7 @@
 	import { createQuery } from '@tanstack/svelte-query';
 
 	const userService = inject(UserService);
-	
+
 	const userQuery = createQuery({
 		queryKey: queryKeys.users.me(),
 		queryFn() {
@@ -32,7 +32,7 @@
 		>
 			<span>{$userQuery.data.username}</span>
 			<div
-				class="overflow-hidden size-10 rounded-full bg-blue-600 text-white font-bold text-lg font-mono flex flex-row items-center justify-center shadow border"
+				class="overflow-hidden size-7 sm:size-10 rounded-full bg-blue-600 text-white font-bold text-sm sm:text-lg font-mono flex flex-row items-center justify-center shadow border"
 			>
 				{initials}
 			</div>

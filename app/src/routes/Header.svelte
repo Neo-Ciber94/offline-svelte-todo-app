@@ -6,16 +6,19 @@
 </script>
 
 <header
-	class="h-16 shadow-md w-full flex flex-row px-4 items-center justify-between border border-neutral-300 relative"
+	class="h-16 shadow-md w-full flex flex-row px-2 sm:px-4 items-center justify-between border border-neutral-300 relative"
 >
 	<button class="text-green-500 lg:hidden block" onclick={() => (sidebar.isOpen = true)}>
-		<svg xmlns="http://www.w3.org/2000/svg" class="size-10" viewBox="0 0 24 24"
+		<svg xmlns="http://www.w3.org/2000/svg" class="size-8 sm:size-10" viewBox="0 0 24 24"
 			><path fill="currentColor" d="M3 4h18v2H3zm0 7h18v2H3zm0 7h18v2H3z" /></svg
 		>
 	</button>
 
-	<a href="/todos" class="font-bold text-xl text-green-500 flex flex-row items-center gap-1">
-		<img src="/todo-app.png" alt="logo" class="size-7" />
+	<a
+		href="/todos"
+		class="font-bold text-base sm:text-xl text-green-500 flex flex-row items-center gap-1"
+	>
+		<img src="/todo-app.png" alt="logo" class="size-5 sm:size-7" />
 		<span> TodoApp </span>
 	</a>
 	<UserAvatar />

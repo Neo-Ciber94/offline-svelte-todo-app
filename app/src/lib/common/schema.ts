@@ -5,6 +5,7 @@ export const todoSchema = z.object({
 	userId: z.string(),
 	title: z.string(),
 	description: z.string().nullable(),
+	emoji: z.string().emoji(),
 	done: z.boolean().default(false),
 	createdAt: z.date().default(() => new Date())
 });
@@ -21,7 +22,8 @@ export type Todo = z.infer<typeof todoSchema>;
 
 export const createTodoSchema = z.object({
 	title: z.string(),
-	description: z.string().nullable()
+	description: z.string().nullable(),
+	emoji: z.string().emoji().default('✅')
 });
 
 export type CreateTodo = z.infer<typeof createTodoSchema>;
@@ -30,6 +32,7 @@ export const updateTodoSchema = z.object({
 	id: z.string(),
 	title: z.string().optional(),
 	description: z.string().optional(),
+	emoji: z.string().emoji().optional(),
 	done: z.boolean().optional()
 });
 

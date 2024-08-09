@@ -9,6 +9,7 @@ CREATE TABLE todo (
     id TEXT PRIMARY KEY,
     user_id TEXT REFERENCES user(id) NOT NULL,
     title TEXT NOT NULL,
+    emoji TEXT NOT NULL,
     description TEXT,
     done INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

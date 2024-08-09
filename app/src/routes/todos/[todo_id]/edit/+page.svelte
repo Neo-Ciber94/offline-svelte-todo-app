@@ -8,6 +8,7 @@
 	import { inject } from '$lib/services/di';
 	import { TodoService } from '$lib/services/todo.service';
 	import { createQuery, useQueryClient, type CreateQueryOptions } from '@tanstack/svelte-query';
+	import SelectEmoji from '$lib/components/SelectEmoji.svelte';
 
 	const todoService = inject(TodoService);
 	const queryClient = useQueryClient();
@@ -25,6 +26,7 @@
 	let title = $state('');
 	let description = $state<string>();
 	let isDone = $state(false);
+	let emoji = $state('');
 
 	// ui state
 	let isMutating = $state(false);
@@ -35,6 +37,7 @@
 		if (data) {
 			title = data.title;
 			description = data.description ?? undefined;
+			emoji = data.emoji;
 			isDone = data.done;
 		}
 	});
@@ -48,6 +51,7 @@
 			await todoService.update({
 				id: todoId,
 				title,
+				emoji,
 				description,
 				done: isDone
 			});
@@ -67,7 +71,7 @@
 		onsubmit={handleEdit}
 		class="w-[95vw] sm:w-[500px] flex flex-col gap-2 shadow border p-4 rounded-md"
 	>
-		<h2 class="font-bold text-2xl">Add Todo</h2>
+		<h2 class="font-bold text-2xl">Edit Todo</h2>
 		<input
 			disabled={isMutating}
 			bind:value={title}
@@ -76,6 +80,7 @@
 			placeholder="Title"
 			required
 		/>
+		<SelectEmoji bind:emoji />
 		<textarea
 			disabled={isMutating}
 			bind:value={description}

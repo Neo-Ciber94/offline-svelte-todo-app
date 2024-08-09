@@ -8,7 +8,6 @@ import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service
 import { NetworkTodoService } from './todo-network.service';
 import { UserService } from './user.service';
 
-
 export class LocalTodoService extends TodoServiceInterface {
 	private userService = inject(UserService);
 	private networkService = inject(NetworkServiceInterface);
@@ -62,6 +61,7 @@ export class LocalTodoService extends TodoServiceInterface {
 			id: crypto.randomUUID(),
 			title: input.title,
 			description: input.description,
+			emoji: input.emoji,
 			done: false,
 			createdAt: new Date()
 		};
@@ -90,6 +90,7 @@ export class LocalTodoService extends TodoServiceInterface {
 		todoToUpdate.description =
 			input.description == null ? todoToUpdate.description : input.description;
 		todoToUpdate.done = input.done == null ? todoToUpdate.done : input.done;
+		todoToUpdate.emoji = input.emoji == null ? todoToUpdate.emoji : input.emoji;
 
 		await db.stores.todos.set(todoToUpdate);
 

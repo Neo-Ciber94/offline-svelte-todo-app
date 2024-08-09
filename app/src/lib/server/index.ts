@@ -9,6 +9,7 @@ type TodoModel = {
 	user_id: string;
 	title: string;
 	description: string | null;
+	emoji: string;
 	done: boolean;
 	created_at: number;
 };
@@ -42,19 +43,25 @@ export async function createTodo(userId: string, input: CreateTodo) {
 		userId,
 		title: input.title,
 		description: input.description,
+		emoji: input.emoji,
 		id: crypto.randomUUID(),
 		createdAt: new Date(),
 		done: false
 	};
 
-	await db.run('INSERT INTO todo VALUES(:id, :user_id, :title, :description, :done, :created_at)', {
-		':id': newTodo.id,
-		':user_id': newTodo.userId,
-		':title': newTodo.title,
-		':description': newTodo.description,
-		':done': Number(newTodo.done),
-		':created_at': newTodo.createdAt.getTime()
-	});
+	await db.run(
+		`INSERT INTO todo(id, user_id, title, description, emoji, done, created_at) 
+		 VALUES(:id, :user_id, :title, :description, :emoji, :done, :created_at)`,
+		{
+			':id': newTodo.id,
+			':user_id': newTodo.userId,
+			':title': newTodo.title,
+			':description': newTodo.description,
+			':emoji': newTodo.emoji,
+			':done': Number(newTodo.done),
+			':created_at': newTodo.createdAt.getTime()
+		}
+	);
 
 	return newTodo;
 }
@@ -78,6 +85,7 @@ export async function updateTodo(userId: string, input: UpdateTodo) {
 			SET 
 				title = :title,
 				description = :description,
+				emoji = :emoji,
 				done = :done
 			WHERE id = :id AND :user_id = :user_id
 		`,
@@ -86,7 +94,8 @@ export async function updateTodo(userId: string, input: UpdateTodo) {
 			':user_id': userId,
 			':title': input.title == null ? todoToUpdate.title : input.title,
 			':description': input.description == null ? todoToUpdate.description : input.description,
-			':done': input.done == null ? Number(todoToUpdate.done) : Number(input.done)
+			':done': input.done == null ? Number(todoToUpdate.done) : Number(input.done),
+			':emoji': input.emoji == null ? todoToUpdate.emoji : input.emoji
 		}
 	);
 
@@ -121,11 +130,15 @@ export async function registerUser(username: string) {
 		username
 	};
 
-	await db.run('INSERT INTO user VALUES (:id, :username, :created_at)', {
-		':id': user.id,
-		':username': user.username,
-		':created_at': user.createdAt.getTime()
-	});
+	await db.run(
+		`INSERT INTO user(id, username, created_at) 
+		VALUES (:id, :username, :created_at)`,
+		{
+			':id': user.id,
+			':username': user.username,
+			':created_at': user.createdAt.getTime()
+		}
+	);
 
 	return user;
 }
@@ -166,6 +179,7 @@ function mapTodo(model: TodoModel): Todo {
 		id: model.id,
 		userId: model.user_id,
 		description: model.description,
+		emoji: model.emoji,
 		done: Boolean(model.done),
 		title: model.title,
 		createdAt: new Date(model.created_at)
