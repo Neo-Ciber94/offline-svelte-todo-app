@@ -7,6 +7,8 @@
 	import { inject } from '$lib/services/di';
 	import { TodoService } from '$lib/services/todo.service';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
+	import { scale } from 'svelte/transition';
+	import * as easing from 'svelte/easing';
 
 	const todoId = $derived($page.params.todo_id);
 	const todoService = inject(TodoService);
@@ -69,50 +71,57 @@
 	{:else if $todoQuery.data}
 		{@const todo = $todoQuery.data}
 
-		<div class="flex flex-col w-[95vw] sm:w-[500px] rounded-xl border shadow overflow-hidden">
-			<div class="bg-black text-white py-4 px-1 text-xl flex flex-row items-center justify-between">
-				<span class="pl-4">
-					{todo.title}
-				</span>
-				<div class="flex flex-row text-sm">
+		{#key todoId}
+			<div
+				in:scale={{ duration: 1000, opacity: 0, start: 0.7, easing: easing.quintOut }}
+				class="flex flex-col w-[95vw] sm:w-[500px] rounded-xl border shadow overflow-hidden"
+			>
+				<div
+					class="bg-black text-white py-4 px-1 text-xl flex flex-row items-center justify-between"
+				>
+					<span class="pl-4">
+						{todo.title}
+					</span>
+					<div class="flex flex-row text-sm">
+						<button
+							disabled={isMutating}
+							class="font-semibold text-red-400 disabled:opacity-70 disabled:cursor-not-allowed min-w-16 text-center"
+							onclick={deleteTodo}
+						>
+							Delete
+						</button>
+						<a
+							data-disabled={isMutating}
+							class="font-semibold text-orange-400 data-[disabled=true]:cursor-not-allowed min-w-16 text-center"
+							href={`/todos/${todo.id}/edit`}
+						>
+							Edit
+						</a>
+					</div>
+				</div>
+				<div class="p-4">
+					{#if todo.description}
+						<p>
+							{todo?.description}
+						</p>
+					{:else}
+						<p class="text-neutral-400 italic">No description</p>
+					{/if}
+
+					<div class="mt-4 w-fit">
+						{@render Done(todo.done)}
+					</div>
+				</div>
+				{#if !todo.done}
 					<button
 						disabled={isMutating}
-						class="font-semibold text-red-400 disabled:opacity-70 disabled:cursor-not-allowed min-w-16 text-center"
-						onclick={deleteTodo}
+						onclick={handleCompleteTodo}
+						class="p-2 bg-neutral-800 hover:bg-neutral-950 text-white rounded-xl shadow text-center mx-2 mb-2 disabled:opacity-70 disabled:cursor-not-allowed"
 					>
-						Delete
+						<span> Mark as Complete</span>
 					</button>
-					<a
-						data-disabled={isMutating}
-						class="font-semibold text-orange-400 data-[disabled=true]:cursor-not-allowed min-w-16 text-center"
-						href={`/todos/${todo.id}/edit`}
-					>
-						Edit
-					</a>
-				</div>
-			</div>
-			<div class="p-4">
-				{#if todo.description}
-					<p>
-						{todo?.description}
-					</p>
-				{:else}
-					<p class="text-neutral-400 italic">No description</p>
 				{/if}
-
-				<div class="mt-4 w-fit">
-					{@render Done(todo.done)}
-				</div>
 			</div>
-			{#if !todo.done}
-				<button
-					disabled={isMutating}
-					onclick={handleCompleteTodo}
-					class="p-2 bg-neutral-800 hover:bg-neutral-950 text-white rounded-xl shadow text-center mx-2 mb-2 disabled:opacity-70 disabled:cursor-not-allowed"
-				>
-					<span> Mark as Complete</span>
-				</button>
-			{/if}
-		</div>
+		{/key}
 	{/if}
 </div>
