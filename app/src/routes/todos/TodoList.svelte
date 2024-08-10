@@ -6,6 +6,8 @@
 	import { inject } from '$lib/services/di';
 	import { TodoService } from '$lib/services/todo.service';
 	import { page } from '$app/stores';
+	import { fly } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 
 	const todoService = inject(TodoService);
 	const todoId = $derived($page.params.todo_id);
@@ -18,9 +20,10 @@
 	});
 </script>
 
-{#snippet TodoItem(todo: Todo)}
+{#snippet TodoItem(todo: Todo, delay: number)}
 	<a
 		data-selected={todoId === todo.id}
+		in:fly|global={{ delay, duration: 500, x: -100, opacity: 0.5, easing: quintOut }}
 		class="shadow shadow-neutral-700 border-neutral-500 flex flex-row gap-2 rounded-md items-center border p-2 hover:bg-neutral-700 data-[selected=true]:bg-neutral-700 cursor-pointer text-white"
 		href={`/todos/${todo.id}`}
 	>
@@ -58,8 +61,8 @@
 				<Loading class="size-6 text-green-300" />
 			</div>
 		{:else if $todosQuery.data}
-			{#each $todosQuery.data as todo (todo.id)}
-				{@render TodoItem(todo)}
+			{#each $todosQuery.data as todo, index (todo.id)}
+				{@render TodoItem(todo, index * 50)}
 			{:else}
 				<h3 class="w-full text-center font-bold text-lg text-green-200 my-2">No todos</h3>
 			{/each}
