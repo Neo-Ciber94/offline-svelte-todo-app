@@ -3,7 +3,7 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import type { Snippet } from 'svelte';
 	import Header from './Header.svelte';
-	import { beforeNavigate, goto } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import { PUBLIC_ROUTES } from '$lib/common/constants';
 	import { inject } from '$lib/services/di';
 	import { TodoService } from '$lib/services/todo.service';
