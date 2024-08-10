@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { queryKeys } from '$lib/client/query-keys';
 	import Loading from '$lib/components/Loading.svelte';
+	import { useIsOnline } from '$lib/runes/use-is-online.svelte';
 	import { inject } from '$lib/services/di';
 	import { UserService } from '$lib/services/user.service';
 	import { createQuery } from '@tanstack/svelte-query';
 
 	const userService = inject(UserService);
+	const online = useIsOnline();
 
 	const userQuery = createQuery({
 		queryKey: queryKeys.users.me(),
@@ -13,6 +15,15 @@
 			return userService.getCurrentUser();
 		}
 	});
+
+	function handleLogout(ev: Event) {
+		if (!online.isOnline) {
+			// We need to go to the backend to remove the cookie, 
+			// alternatively we could expose the cookie to the client so we can wipe it client side instead
+			alert('Unable to logout while offline');
+			ev.preventDefault();
+		}
+	}
 </script>
 
 {#if $userQuery.isLoading}
@@ -24,6 +35,7 @@
 		<a
 			data-sveltekit-preload-data="false"
 			class="px-5 py-2 rounded-md shadow bg-black text-white"
+			onclick={handleLogout}
 			href="/api/users/logout">Logout</a
 		>
 
