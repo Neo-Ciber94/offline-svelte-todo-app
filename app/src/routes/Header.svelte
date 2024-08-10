@@ -6,7 +6,7 @@
 </script>
 
 <header
-	class="h-[var(--header-height)] shadow-md w-full flex flex-row px-2 sm:px-4 items-center justify-between border border-neutral-300 relative"
+	class="h-[var(--header-height)] shadow shadow-green-500/40 w-full flex flex-row px-2 sm:px-4 items-center justify-between relative bg-black text-white"
 >
 	<button class="text-green-500 lg:hidden block" onclick={() => (sidebar.isOpen = true)}>
 		<svg xmlns="http://www.w3.org/2000/svg" class="size-8 sm:size-10" viewBox="0 0 24 24"
