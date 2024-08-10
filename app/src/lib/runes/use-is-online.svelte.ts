@@ -1,10 +1,10 @@
-let ONLINE = $state(false);
+let IS_ONLINE = $state(true);
 
 $effect.root(() => {
-	ONLINE = navigator.onLine;
+	IS_ONLINE = navigator.onLine;
 
-	const handleOnline = () => (ONLINE = true);
-	const handleOffline = () => (ONLINE = false);
+	const handleOnline = () => (IS_ONLINE = true);
+	const handleOffline = () => (IS_ONLINE = false);
 
 	window.addEventListener('online', handleOnline);
 	window.addEventListener('offline', handleOffline);
@@ -18,7 +18,7 @@ $effect.root(() => {
 export function useIsOnline() {
 	return {
 		get isOnline() {
-			return ONLINE;
+			return IS_ONLINE;
 		}
 	};
 }
