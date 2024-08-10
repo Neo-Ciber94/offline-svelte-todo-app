@@ -98,7 +98,7 @@
 					opacity: 0,
 					easing: quintOut
 				}}
-				class="flex flex-col absolute bg-white text-black shadow rounded-md text-base top-12 min-w-0 w-[80vw] md:min-w-40 right-0 py-1"
+				class="flex flex-col absolute bg-white text-black shadow rounded-md text-base top-12 w-[80vw] sm:w-40 right-0 py-1"
 			>
 				<span
 					class="text-left px-4 py-3 md:py-2 hover:bg-neutral-100 flex flex-row gap-2 items-cente"
