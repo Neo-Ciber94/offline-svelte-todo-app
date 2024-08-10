@@ -35,7 +35,7 @@ data-[open=false]:-translate-x-full data-[open=true]:translate-x-0 transition-al
 	</a>
 
 	<button
-		class="text-green-300 absolute top-2 right-2 lg:hidden block"
+		class="text-white absolute top-2 right-2 lg:hidden block"
 		onclick={() => {
 			sidebar.isOpen = false;
 		}}
