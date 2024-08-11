@@ -7,14 +7,13 @@
 
 	const sidebar = useSidebar();
 	const isLargeScreen = useMediaQuery('(min-width: 1024px)');
-	const isTabletScreen = useMediaQuery('(min-width: 640px)');
 
 	$effect.pre(() => {
 		sidebar.isOpen = isLargeScreen.matching;
 	});
 
 	afterNavigate(() => {
-		if (isTabletScreen.matching) {
+		if (isLargeScreen.matching) {
 			return;
 		}
 

@@ -74,7 +74,7 @@
 		{#key todoId}
 			<div
 				in:scale={{ duration: 1000, opacity: 0, start: 0.7, easing: easing.quintOut }}
-				class="flex flex-col w-[95vw] sm:w-[500px] rounded-xl border shadow overflow-hidden"
+				class="flex flex-col w-[95vw] sm:w-[500px] rounded-xl border shadow overflow-hidden bg-white"
 			>
 				<div
 					class="bg-black text-white py-4 px-1 text-xl flex flex-row items-center justify-between"
