@@ -1,9 +1,16 @@
-node_modules
+Dockerfile
+.dockerignore
+.git
+.gitignore
+README.md
+.prettierrc
+.eslintrc.cjs
+.editorconfig
 .svelte-kit
+.vscode
+node_modules
 build
-dist
-dev-dist
-data
+**/.env
 
 # Vite
 vite.config.js.timestamp-*
