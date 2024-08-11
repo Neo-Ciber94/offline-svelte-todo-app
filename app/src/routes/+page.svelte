@@ -55,6 +55,10 @@
 </div>
 
 <style>
+	:global(body) {
+		overflow-y: hidden;
+	}
+
 	@keyframes growAnimation {
 		0%,
 		100% {
