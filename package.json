@@ -1,6 +1,7 @@
 {
   "name": "root",
   "private": true,
+  "packageManager": "bun@1.1.17",
   "workspaces": [
     "app",
     "packages/*"
