@@ -4,6 +4,7 @@
 	import { UserService } from '$lib/services/user.service';
 	import { createQuery } from '@tanstack/svelte-query';
 	import Loading from '$lib/components/Loading.svelte';
+	import { tick } from 'svelte';
 
 	const userService = inject(UserService);
 	const userQuery = createQuery({
@@ -14,7 +15,9 @@
 	let visible = $state(false);
 
 	$effect(() => {
-		visible = true;
+		tick().then(() => {
+			visible = true;
+		});
 	});
 </script>
 
