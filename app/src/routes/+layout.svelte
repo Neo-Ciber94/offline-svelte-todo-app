@@ -3,23 +3,19 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import type { Snippet } from 'svelte';
 	import Header from './Header.svelte';
-	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import { PUBLIC_ROUTES } from '$lib/common/constants';
 	import { inject } from '$lib/services/di';
-	import { TodoService } from '$lib/services/todo.service';
 	import { UserService } from '$lib/services/user.service';
-	import { TodoQueueService } from '$lib/services/todo-queue.service';
 	import ConnectivityIndicator from './ConnectivityIndicator.svelte';
+	import Synchronize from './Synchronize.svelte';
 
 	type Props = {
 		children: Snippet;
 	};
 
 	const { children }: Props = $props();
-
-	const todoService = inject(TodoService);
 	const userService = inject(UserService);
-	const todoQueueService = inject(TodoQueueService);
 
 	const queryClient = new QueryClient({
 		defaultOptions: {
@@ -47,28 +43,6 @@
 		};
 
 		run().catch(console.error);
-	});
-
-	$effect.pre(() => {
-		todoService.synchronize().catch(console.error);
-	});
-
-	$effect.pre(() => {
-		async function runPendingTodos() {
-			if (!navigator.onLine) {
-				return;
-			}
-
-			await todoQueueService.runPending();
-		}
-
-		// First run
-		runPendingTodos();
-
-		window.addEventListener('online', runPendingTodos);
-		return () => {
-			window.addEventListener('online', runPendingTodos);
-		};
 	});
 
 	beforeNavigate(async ({ cancel, to }) => {
@@ -102,6 +76,7 @@
 
 <QueryClientProvider client={queryClient}>
 	<Header />
+	<Synchronize />
 	{@render children()}
 </QueryClientProvider>
 
