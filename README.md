@@ -1,3 +1,3 @@
-# Local-First Todo-App
+# Offline-First Todo App
 
 A todo app in svelte5 with offline support.
