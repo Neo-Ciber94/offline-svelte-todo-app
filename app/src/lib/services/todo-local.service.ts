@@ -58,7 +58,7 @@ export class LocalTodoService extends TodoServiceInterface {
 		const userId = user.id;
 		const newTodo: Todo = {
 			userId,
-			id: crypto.randomUUID(),
+			id: input.id,
 			title: input.title,
 			description: input.description,
 			emoji: input.emoji,

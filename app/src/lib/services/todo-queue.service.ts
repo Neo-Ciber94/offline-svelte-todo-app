@@ -15,6 +15,35 @@ export class TodoQueueService extends TodoQueueServiceInterface {
 
 	async enqueue(pending: PendingTodo): Promise<void> {
 		console.log('🕒 Pending todo: ', pending);
+
+		// If is trying to update a pending 'add', we update the add instead
+		if (pending.action.type === 'update') {
+			const existingAdd = await db.stores.pendingTodos.getByKey(pending.id);
+
+			if (existingAdd && existingAdd.action.type === 'create') {
+				// Update the add input
+				const addInput = existingAdd.action.input;
+				const updateInput = pending.action.input;
+				addInput.title = updateInput.title == null ? addInput.title : updateInput.title;
+				addInput.description =
+					updateInput.description == null ? addInput.description : updateInput.description;
+				addInput.emoji = updateInput.emoji == null ? addInput.emoji : updateInput.emoji;
+
+				await db.stores.pendingTodos.set(existingAdd);
+				return;
+			}
+		}
+
+		// If is trying to delete a pending 'add' or update we delete both
+		if (pending.action.type === 'delete' || pending.action.type === 'update') {
+			const existingAdd = await db.stores.pendingTodos.getByKey(pending.id);
+			if (existingAdd && existingAdd.action.type === 'create') {
+				await db.stores.pendingTodos.delete(pending.id);
+				return;
+			}
+		}
+
+		// otherwise just queue the action
 		await db.stores.pendingTodos.set(pending);
 	}
 

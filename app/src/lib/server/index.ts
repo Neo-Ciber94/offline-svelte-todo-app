@@ -41,10 +41,10 @@ export async function getTodoById(todoId: string) {
 export async function createTodo(userId: string, input: CreateTodo) {
 	const newTodo: Todo = {
 		userId,
+		id: input.id,
 		title: input.title,
 		description: input.description,
 		emoji: input.emoji,
-		id: crypto.randomUUID(),
 		createdAt: new Date(),
 		done: false
 	};
@@ -104,7 +104,7 @@ export async function updateTodo(userId: string, input: UpdateTodo) {
 
 export async function deleteTodo(userId: string, todoId: string) {
 	const deleted = await db.get<TodoModel>(
-		'DELETE FROM todo WHERE id = ? AND WHERE user_id = ? RETURNING *',
+		'DELETE FROM todo WHERE id = ? AND user_id = ? RETURNING *',
 		[todoId, userId]
 	);
 
