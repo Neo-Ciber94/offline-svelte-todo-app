@@ -9,10 +9,7 @@
 	<body data-sveltekit-preload-data="hover">
 		<script>
 			try {
-				const isOpen = localStorage.getItem('sidebarOpen');
-				if (isOpen) {
-					globalThis.SIDEBAR_OPEN = isOpen === 'true';
-				}
+				window.SIDEBAR_OPEN = localStorage.getItem('sidebarOpen') === 'true';
 			} catch {
 				//
 			}

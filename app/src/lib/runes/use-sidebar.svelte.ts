@@ -1,6 +1,9 @@
-declare const SIDEBAR_OPEN: boolean | undefined;
+declare global {
+	// eslint-disable-next-line no-var
+	var SIDEBAR_OPEN: boolean | boolean;
+}
 
-let isSidebarOpen = $state(typeof SIDEBAR_OPEN === 'undefined' ? true : SIDEBAR_OPEN);
+let isSidebarOpen = $state(Boolean(globalThis.SIDEBAR_OPEN));
 
 export function useSidebar() {
 	return {
