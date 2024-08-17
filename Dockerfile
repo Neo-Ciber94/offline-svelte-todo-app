@@ -7,6 +7,7 @@ RUN bun install --frozen-lockfile
 
 # Build the app
 FROM base as builder
+RUN mkdir app/data
 RUN bun run build
 RUN cd app && bun run db:migrate
 

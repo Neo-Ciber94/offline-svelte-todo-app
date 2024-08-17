@@ -12,6 +12,9 @@ node_modules
 build
 **/.env
 
+# Ignore db data
+app/data/database.db
+
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
