@@ -7,17 +7,24 @@ RUN bun install --frozen-lockfile
 
 # Build the app
 FROM base as builder
-RUN mkdir app/data
+WORKDIR /base
+RUN cd app && mkdir data && bun run db:migrate
 RUN bun run build
-RUN cd app && bun run db:migrate
+
+# Keep only production dependencies
+FROM builder as release
+WORKDIR /base
+RUN rm -rf node_modules
+RUN rm -rf app/node_modules
+RUN bun install --production
 
 # Copy all and run
 FROM node:20-alpine3.19 as runner
 WORKDIR /app
-COPY --from=builder node_modules ./
-COPY --from=builder app/package.json ./
-COPY --from=builder app/build ./app/build
-COPY --from=builder app/data ./app/data
+COPY --from=release /base/node_modules ./node_modules
+COPY --from=release /base/app/data ./data
+COPY --from=release /base/app/build ./build
+COPY --from=release /base/app/package.json ./package.json
 
 ENV PORT=5000
 CMD ["node", "/app/build/index.js"]

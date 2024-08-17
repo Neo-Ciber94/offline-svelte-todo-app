@@ -2,19 +2,19 @@ Dockerfile
 .dockerignore
 .git
 .gitignore
-README.md
 .prettierrc
 .eslintrc.cjs
 .editorconfig
 .svelte-kit
 .vscode
 node_modules
-build
+app/build
+app/data
+**/dist
+**/dev-dist
+**/README.md
 **/.env
 
-# Ignore db data
-app/data/database.db
-
 # Vite
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
+**/vite.config.js.timestamp-*
+**/vite.config.ts.timestamp-*
