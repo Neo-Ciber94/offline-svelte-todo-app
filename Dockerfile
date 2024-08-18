@@ -19,7 +19,8 @@ RUN rm -rf app/node_modules
 RUN bun install --production
 
 # Copy all and run
-FROM node:20-alpine3.19 as runner
+## We are using 'slim' here, alpine is silently crashing with a 'segmentation fault'
+FROM node:20.16.0-slim as runner 
 WORKDIR /app
 COPY --from=release /base/node_modules ./node_modules
 COPY --from=release /base/app/data ./data
