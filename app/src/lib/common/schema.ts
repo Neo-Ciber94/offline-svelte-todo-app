@@ -21,12 +21,7 @@ export const userSchema = z.object({
 export type Todo = z.infer<typeof todoSchema>;
 
 export const createTodoSchema = z.object({
-	id: z
-		.string()
-		.uuid()
-		.default(() => crypto.randomUUID())
-		.optional()
-		.catch(() => crypto.randomUUID()),
+	id: z.string().uuid().optional(),
 	title: z.string(),
 	description: z.string().nullable(),
 	emoji: z.string().emoji().default('✅')

@@ -9,7 +9,8 @@
   "scripts": {
     "build": "turbo build",
     "format": "turbo format",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "check": "turbo check"
   },
   "devDependencies": {
     "turbo": "^2.0.11"

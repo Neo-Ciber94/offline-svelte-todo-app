@@ -41,7 +41,7 @@ export async function getTodoById(todoId: string) {
 export async function createTodo(userId: string, input: CreateTodo) {
 	const newTodo: Todo = {
 		userId,
-		id: input.id,
+		id: input.id ?? crypto.randomUUID(),
 		title: input.title,
 		description: input.description,
 		emoji: input.emoji,

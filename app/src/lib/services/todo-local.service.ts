@@ -1,5 +1,11 @@
 import { ApplicationError } from '$lib/common/error';
-import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
+import {
+	createTodoSchema,
+	updateTodoSchema,
+	type CreateTodo,
+	type Todo,
+	type UpdateTodo
+} from '$lib/common/schema';
 import { applyTodosQuery } from '$lib/common/todo.utils';
 import { inject } from './di';
 import { db } from './local-db';
@@ -55,13 +61,15 @@ export class LocalTodoService extends TodoServiceInterface {
 			throw new ApplicationError(400, 'Failed to get current user');
 		}
 
+		const result = createTodoSchema.parse(input);
+
 		const userId = user.id;
 		const newTodo: Todo = {
 			userId,
-			id: input.id,
-			title: input.title,
-			description: input.description,
-			emoji: input.emoji,
+			id: crypto.randomUUID(),
+			title: result.title,
+			description: result.description,
+			emoji: result.emoji,
 			done: false,
 			createdAt: new Date()
 		};
@@ -86,11 +94,13 @@ export class LocalTodoService extends TodoServiceInterface {
 			return null;
 		}
 
-		todoToUpdate.title = input.title == null ? todoToUpdate.title : input.title;
+		const result = updateTodoSchema.parse(input);
+
+		todoToUpdate.title = result.title == null ? todoToUpdate.title : result.title;
 		todoToUpdate.description =
-			input.description == null ? todoToUpdate.description : input.description;
-		todoToUpdate.done = input.done == null ? todoToUpdate.done : input.done;
-		todoToUpdate.emoji = input.emoji == null ? todoToUpdate.emoji : input.emoji;
+			result.description == null ? todoToUpdate.description : result.description;
+		todoToUpdate.done = result.done == null ? todoToUpdate.done : result.done;
+		todoToUpdate.emoji = result.emoji == null ? todoToUpdate.emoji : result.emoji;
 
 		await db.stores.todos.set(todoToUpdate);
 
