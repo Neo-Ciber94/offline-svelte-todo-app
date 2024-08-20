@@ -25,6 +25,7 @@ export const createTodoSchema = z.object({
 		.string()
 		.uuid()
 		.default(() => crypto.randomUUID())
+		.optional()
 		.catch(() => crypto.randomUUID()),
 	title: z.string(),
 	description: z.string().nullable(),
