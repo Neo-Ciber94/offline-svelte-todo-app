@@ -6,13 +6,16 @@ export default defineConfig({
 	plugins: [
 		sveltekit(),
 		SvelteKitPWA({
-			strategies: 'injectManifest',
-			srcDir: 'src',
-			filename: 'service-worker.ts',
+			// strategies: 'injectManifest',
+			// srcDir: 'src',
+			// filename: 'service-worker.ts',
 			registerType: 'autoUpdate',
-			scope: '/',
 			workbox: {
-				navigateFallback: '/offline'
+				navigateFallback: '/200.html',
+				additionalManifestEntries: ['/200.html'],
+				cleanupOutdatedCaches: true,
+				clientsClaim: true,
+				skipWaiting: true
 			},
 			devOptions: {
 				enabled: true,
