@@ -9,6 +9,7 @@
 	import { UserService } from '$lib/services/user.service';
 	import ConnectivityIndicator from './ConnectivityIndicator.svelte';
 	import Synchronize from './Synchronize.svelte';
+	import { dev } from '$app/environment';
 
 	type Props = {
 		children: Snippet;
@@ -29,22 +30,26 @@
 
 	let isRedirecting = $state(false);
 
-	// $effect(() => {
-	// 	const run = async () => {
-	// 		const { registerSW } = await import('virtual:pwa-register');
-	// 		registerSW({
-	// 			immediate: true,
-	// 			onRegisteredSW(scriptUrl) {
-	// 				console.log(`SW Registered: ${scriptUrl}`);
-	// 			},
-	// 			onRegisterError(error) {
-	// 				console.log('SW registration error', error);
-	// 			}
-	// 		});
-	// 	};
+	$effect.pre(() => {
+		if (dev) {
+			return;
+		}
 
-	// 	run().catch(console.error);
-	// });
+		const run = async () => {
+			const { registerSW } = await import('virtual:pwa-register');
+			registerSW({
+				immediate: true,
+				onRegisteredSW(scriptUrl) {
+					console.log(`SW Registered: ${scriptUrl}`);
+				},
+				onRegisterError(error) {
+					console.log('SW registration error', error);
+				}
+			});
+		};
+
+		run().catch(console.error);
+	});
 
 	beforeNavigate(async ({ cancel, to }) => {
 		if (!to || isRedirecting) {
