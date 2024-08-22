@@ -40,10 +40,13 @@ export class TodoService extends TodoServiceInterface {
 	}
 
 	async insert(input: CreateTodo): Promise<Todo> {
+		// We generate the id client-side to ensure is sync with the backend when offline
+		input.id ??= crypto.randomUUID();
+
 		if (!this.networkService.isOnline()) {
 			const newTodo = await this.local.insert(input);
 			this.pendingQueue
-				.enqueue({ id: newTodo.id, action: { type: 'create', input: input } })
+				.enqueue({ id: newTodo.id, action: { type: 'create', input } })
 				.catch(console.error);
 
 			return newTodo;

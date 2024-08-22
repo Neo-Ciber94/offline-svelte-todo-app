@@ -29,22 +29,22 @@
 
 	let isRedirecting = $state(false);
 
-	$effect.pre(() => {
-		const run = async () => {
-			const { registerSW } = await import('virtual:pwa-register');
-			registerSW({
-				immediate: true,
-				onRegisteredSW(scriptUrl) {
-					console.log(`SW Registered: ${scriptUrl}`);
-				},
-				onRegisterError(error) {
-					console.log('SW registration error', error);
-				}
-			});
-		};
+	// $effect(() => {
+	// 	const run = async () => {
+	// 		const { registerSW } = await import('virtual:pwa-register');
+	// 		registerSW({
+	// 			immediate: true,
+	// 			onRegisteredSW(scriptUrl) {
+	// 				console.log(`SW Registered: ${scriptUrl}`);
+	// 			},
+	// 			onRegisterError(error) {
+	// 				console.log('SW registration error', error);
+	// 			}
+	// 		});
+	// 	};
 
-		run().catch(console.error);
-	});
+	// 	run().catch(console.error);
+	// });
 
 	beforeNavigate(async ({ cancel, to }) => {
 		if (!to || isRedirecting) {
