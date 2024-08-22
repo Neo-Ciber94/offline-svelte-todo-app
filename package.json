@@ -13,7 +13,11 @@
     "check": "turbo check",
     "postinstall": "patch-package"
   },
+  "trustedDependencies": [
+    "patch-package"
+  ],
   "devDependencies": {
+    "patch-package": "^8.0.0",
     "turbo": "^2.0.11"
   }
 }
