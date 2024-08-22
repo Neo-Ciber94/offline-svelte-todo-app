@@ -10,7 +10,8 @@
     "build": "turbo build",
     "format": "turbo format",
     "lint": "turbo lint",
-    "check": "turbo check"
+    "check": "turbo check",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "turbo": "^2.0.11"
