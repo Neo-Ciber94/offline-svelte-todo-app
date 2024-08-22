@@ -21,7 +21,8 @@
 		defaultOptions: {
 			queries: {
 				retry: 1,
-				staleTime: Infinity
+				staleTime: Infinity,
+				networkMode: 'offlineFirst'
 			}
 		}
 	});
