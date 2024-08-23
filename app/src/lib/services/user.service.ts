@@ -1,22 +1,16 @@
 import type { Result } from '$lib/common/types';
 import { userSchema, type User } from '$lib/common/schema';
 import { ApplicationError } from '$lib/common/error';
-import { NetworkServiceInterface } from './network-service';
 import * as devalue from 'devalue';
 import { createKvStore } from '$lib/client/idb-kv';
 import { inject } from './di';
+import { NetworkService } from './network-service';
 
 const CURRENT_USER_KEY = 'current-user';
 const { set, del, get } = createKvStore();
 
-abstract class UserServiceInterface {
-	abstract getCurrentUser(): Promise<User | null>;
-	abstract register(username: string): Promise<Result<User, string>>;
-	abstract logout(): Promise<void>;
-}
-
-export class UserService extends UserServiceInterface {
-	private networkService = inject(NetworkServiceInterface);
+export class UserService {
+	private networkService = inject(NetworkService);
 	#user: User | null | undefined = undefined;
 
 	async getCurrentUser(): Promise<User | null> {

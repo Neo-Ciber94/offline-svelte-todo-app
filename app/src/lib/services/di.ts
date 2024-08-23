@@ -1,5 +1,5 @@
 import { DependencyContainer } from './dependency-container';
-import { NetworkService, NetworkServiceInterface } from './network-service';
+import { NetworkService } from './network-service';
 import { LocalTodoService } from './todo-local.service';
 import { NetworkTodoService } from './todo-network.service';
 import { TodoQueueService } from './todo-queue.service';
@@ -7,7 +7,7 @@ import { TodoService } from './todo.service';
 import { UserService } from './user.service';
 
 const container = new DependencyContainer();
-container.register(NetworkServiceInterface, { as: NetworkService });
+container.register(NetworkService);
 container.register(LocalTodoService);
 container.register(NetworkTodoService);
 container.register(UserService);

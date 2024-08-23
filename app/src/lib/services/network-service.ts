@@ -1,8 +1,4 @@
-export abstract class NetworkServiceInterface {
-	abstract isOnline(): boolean;
-}
-
-export class NetworkService extends NetworkServiceInterface {
+export class NetworkService {
 	isOnline(): boolean {
 		return navigator.onLine;
 	}

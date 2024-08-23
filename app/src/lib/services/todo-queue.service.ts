@@ -1,16 +1,11 @@
 import type { PendingTodo } from '$lib/common/schema';
 import { inject } from './di';
 import { db } from './local-db';
-import { NetworkServiceInterface } from './network-service';
+import { NetworkService } from './network-service';
 import { NetworkTodoService } from './todo-network.service';
 
-export abstract class TodoQueueServiceInterface {
-	abstract enqueue(pending: PendingTodo): Promise<void>;
-	abstract runPending(): Promise<number>;
-}
-
-export class TodoQueueService extends TodoQueueServiceInterface {
-	private networkService = inject(NetworkServiceInterface);
+export class TodoQueueService {
+	private networkService = inject(NetworkService);
 	private networkTodos = inject(NetworkTodoService);
 
 	async enqueue(pending: PendingTodo): Promise<void> {

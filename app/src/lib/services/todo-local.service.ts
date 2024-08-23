@@ -9,14 +9,14 @@ import {
 import { applyTodosQuery } from '$lib/common/todo.utils';
 import { inject } from './di';
 import { db } from './local-db';
-import { NetworkServiceInterface } from './network-service';
+import { NetworkService } from './network-service';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import { NetworkTodoService } from './todo-network.service';
 import { UserService } from './user.service';
 
 export class LocalTodoService extends TodoServiceInterface {
 	private userService = inject(UserService);
-	private networkService = inject(NetworkServiceInterface);
+	private networkService = inject(NetworkService);
 	private networkTodoService = inject(NetworkTodoService);
 
 	async synchronize() {

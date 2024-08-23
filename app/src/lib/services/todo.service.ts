@@ -1,13 +1,13 @@
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
 import { inject } from './di';
-import { NetworkServiceInterface } from './network-service';
+import { NetworkService } from './network-service';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import { LocalTodoService } from './todo-local.service';
 import { NetworkTodoService } from './todo-network.service';
 import { TodoQueueService } from './todo-queue.service';
 
 export class TodoService extends TodoServiceInterface {
-	private readonly networkService = inject(NetworkServiceInterface);
+	private readonly networkService = inject(NetworkService);
 	private readonly local = inject(LocalTodoService);
 	private readonly network = inject(NetworkTodoService);
 	private readonly pendingQueue = inject(TodoQueueService);
