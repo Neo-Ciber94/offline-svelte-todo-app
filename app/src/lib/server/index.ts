@@ -150,7 +150,7 @@ export async function synchronizeTodos(userId: string, pendingTodos: PendingTodo
 					// The default values shouldn't be picked
 					const input: CreateTodo = {
 						...pending.action.input,
-						title: pending.action.input.title ?? '',
+						title: pending.action.input.title ?? '<empty>',
 						emoji: pending.action.input.emoji ?? DEFAULT_EMOJI
 					};
 
