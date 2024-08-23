@@ -1,5 +1,6 @@
+import { DEFAULT_EMOJI } from '$lib/common/emojis';
 import { ApplicationError } from '$lib/common/error';
-import type { CreateTodo, Todo, UpdateTodo, User } from '$lib/common/schema';
+import type { CreateTodo, PendingTodo, Todo, UpdateTodo, User } from '$lib/common/schema';
 import { applyTodosQuery } from '$lib/common/todo.utils';
 import type { GetAllTodos } from '$lib/services/todo-interface.service';
 import { db } from './db';
@@ -38,30 +39,48 @@ export async function getTodoById(todoId: string) {
 	return mapTodo(todo);
 }
 
-export async function createTodo(userId: string, input: CreateTodo) {
+type CreateTodoOptions = {
+	onConflict?: 'update';
+};
+
+export async function createTodo(userId: string, input: CreateTodo, opts?: CreateTodoOptions) {
+	const { onConflict } = opts || {};
 	const newTodo: Todo = {
 		userId,
 		id: input.id ?? crypto.randomUUID(),
 		title: input.title,
-		description: input.description,
+		description: input.description ?? null,
 		emoji: input.emoji,
 		createdAt: new Date(),
 		done: false
 	};
 
-	await db.run(
-		`INSERT INTO todo(id, user_id, title, description, emoji, done, created_at) 
-		 VALUES(:id, :user_id, :title, :description, :emoji, :done, :created_at)`,
-		{
-			':id': newTodo.id,
-			':user_id': newTodo.userId,
-			':title': newTodo.title,
-			':description': newTodo.description,
-			':emoji': newTodo.emoji,
-			':done': Number(newTodo.done),
-			':created_at': newTodo.createdAt.getTime()
-		}
-	);
+	let query = `
+		INSERT INTO todo(id, user_id, title, description, emoji, done, created_at) 
+		VALUES(:id, :user_id, :title, :description, :emoji, :done, :created_at)
+	`;
+
+	if (onConflict === 'update') {
+		query += `
+			ON CONFLICT(id) DO UPDATE SET 
+				user_id = excluded.user_id,
+				title = excluded.title,
+				description = excluded.description,
+				emoji = excluded.emoji,
+				done = excluded.done,
+				created_at = excluded.created_at
+		`;
+	}
+
+	await db.run(query, {
+		':id': newTodo.id,
+		':user_id': newTodo.userId,
+		':title': newTodo.title,
+		':description': newTodo.description,
+		':emoji': newTodo.emoji,
+		':done': Number(newTodo.done),
+		':created_at': newTodo.createdAt.getTime()
+	});
 
 	return newTodo;
 }
@@ -113,6 +132,48 @@ export async function deleteTodo(userId: string, todoId: string) {
 	}
 
 	return mapTodo(deleted);
+}
+
+export async function synchronizeTodos(userId: string, pendingTodos: PendingTodo[]) {
+	await db.run('BEGIN TRANSACTION;');
+
+	const operations: Promise<void>[] = [];
+
+	try {
+		for (const pending of pendingTodos) {
+			switch (pending.action.type) {
+				case 'create': {
+					operations.push(Promise.resolve(void createTodo(userId, pending.action.input)));
+					break;
+				}
+				case 'update': {
+					// The default values shouldn't be picked
+					const input: CreateTodo = {
+						...pending.action.input,
+						title: pending.action.input.title ?? '',
+						emoji: pending.action.input.emoji ?? DEFAULT_EMOJI
+					};
+
+					operations.push(
+						Promise.resolve(void createTodo(userId, input, { onConflict: 'update' }))
+					);
+					break;
+				}
+				case 'delete': {
+					operations.push(Promise.resolve(void deleteTodo(userId, pending.action.input.id)));
+					break;
+				}
+			}
+		}
+
+		await Promise.all(operations);
+		await db.run('COMMIT TRANSACTION;');
+	} catch (err) {
+		console.error(err);
+		await db.run('ROLLBACK;');
+	}
+
+	return pendingTodos.length;
 }
 
 export async function registerUser(username: string) {

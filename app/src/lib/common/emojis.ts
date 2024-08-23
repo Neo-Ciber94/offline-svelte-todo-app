@@ -62,5 +62,7 @@ export const EMOJIS = [
 	{ value: '📈', name: 'Chart Increasing' },
 	{ value: '💼', name: 'Briefcase' },
 	{ value: '🔒', name: 'Locked' },
-	{ value: '✅', name: 'Check' },
+	{ value: '✅', name: 'Check' }
 ] as const;
+
+export const DEFAULT_EMOJI = EMOJIS[EMOJIS.length - 1].value!;

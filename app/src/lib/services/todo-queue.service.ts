@@ -1,39 +1,35 @@
+import { ApplicationError } from '$lib/common/error';
 import type { PendingTodo } from '$lib/common/schema';
+import type { PendingTodosOutput } from '../../routes/api/todos/sync/+server';
 import { inject } from './di';
 import { db } from './local-db';
 import { NetworkService } from './network-service';
-import { NetworkTodoService } from './todo-network.service';
+import * as devalue from 'devalue';
 
 export class TodoQueueService {
 	private networkService = inject(NetworkService);
-	private networkTodos = inject(NetworkTodoService);
 
 	async enqueue(pending: PendingTodo): Promise<void> {
 		console.log('🕒 Pending todo: ', pending);
 
-		// If is trying to update a pending 'add', we update the add instead
+		// If trying to update an already added, we merge the add and update
 		if (pending.action.type === 'update') {
-			const existingAdd = await db.stores.pendingTodos.getByKey(pending.id);
+			const existing = await db.stores.pendingTodos.getByKey(pending.action.input.id);
 
-			if (existingAdd && existingAdd.action.type === 'create') {
-				// Update the add input
-				const addInput = existingAdd.action.input;
-				const updateInput = pending.action.input;
-				addInput.title = updateInput.title == null ? addInput.title : updateInput.title;
-				addInput.description =
-					updateInput.description == null ? addInput.description : updateInput.description;
-				addInput.emoji = updateInput.emoji == null ? addInput.emoji : updateInput.emoji;
-
-				await db.stores.pendingTodos.set(existingAdd);
-				return;
+			if (existing && ['create', 'update'].includes(existing.action.type)) {
+				pending.action.input = {
+					...existing.action.input,
+					...pending.action.input
+				};
 			}
 		}
 
-		// If is trying to delete a pending 'add' or update we delete both
-		if (pending.action.type === 'delete' || pending.action.type === 'update') {
-			const existingAdd = await db.stores.pendingTodos.getByKey(pending.id);
-			if (existingAdd && existingAdd.action.type === 'create') {
-				await db.stores.pendingTodos.delete(pending.id);
+		// If we try to delete an existing we just delete the local
+		if (pending.action.type === 'delete') {
+			const existing = await db.stores.pendingTodos.getByKey(pending.action.input.id);
+
+			if (existing && ['create', 'update'].includes(existing.action.type)) {
+				await db.stores.pendingTodos.delete(existing.id);
 				return;
 			}
 		}
@@ -53,48 +49,65 @@ export class TodoQueueService {
 			return 0;
 		}
 
-		let pendingCount = pendingTodos.length;
+		const res = await fetch('/api/todos/sync', {
+			method: 'POST',
+			body: devalue.stringify(pendingTodos)
+		});
 
-		async function deletePending(id: string) {
-			await db.stores.pendingTodos.delete(id);
-			pendingCount -= 1;
+		const contents = await res.text();
+
+		if (!res.ok) {
+			console.error(contents);
+			throw new ApplicationError(400, 'Failed to process pending todos');
+		} else {
+			await db.stores.pendingTodos.deleteAll();
 		}
 
-		for (const pendingTodo of pendingTodos) {
-			switch (pendingTodo.action.type) {
-				case 'create': {
-					try {
-						await this.networkTodos.insert(pendingTodo.action.input);
-						await deletePending(pendingTodo.id);
-					} catch {
-						// ignore
-					}
+		const result = devalue.parse(contents) as PendingTodosOutput;
 
-					break;
-				}
-				case 'update': {
-					try {
-						await this.networkTodos.update(pendingTodo.action.input);
-						await deletePending(pendingTodo.id);
-					} catch {
-						// ignore
-					}
+		return result.processed;
+		// let pendingCount = pendingTodos.length;
 
-					break;
-				}
-				case 'delete': {
-					try {
-						await this.networkTodos.delete(pendingTodo.action.input.id);
-						await deletePending(pendingTodo.id);
-					} catch {
-						// ignore
-					}
+		// async function deletePending(id: string) {
+		// 	await db.stores.pendingTodos.delete(id);
+		// 	pendingCount -= 1;
+		// }
 
-					break;
-				}
-			}
-		}
+		// for (const pendingTodo of pendingTodos) {
+		// 	switch (pendingTodo.action.type) {
+		// 		case 'create': {
+		// 			try {
+		// 				await this.networkTodos.insert(pendingTodo.action.input);
+		// 				await deletePending(pendingTodo.id);
+		// 			} catch {
+		// 				// ignore
+		// 			}
 
-		return pendingCount;
+		// 			break;
+		// 		}
+		// 		case 'update': {
+		// 			try {
+		// 				await this.networkTodos.update(pendingTodo.action.input);
+		// 				await deletePending(pendingTodo.id);
+		// 			} catch {
+		// 				// ignore
+		// 			}
+
+		// 			break;
+		// 		}
+		// 		case 'delete': {
+		// 			try {
+		// 				await this.networkTodos.delete(pendingTodo.action.input.id);
+		// 				await deletePending(pendingTodo.id);
+		// 			} catch {
+		// 				// ignore
+		// 			}
+
+		// 			break;
+		// 		}
+		// 	}
+		// }
+
+		// return pendingCount;
 	}
 }

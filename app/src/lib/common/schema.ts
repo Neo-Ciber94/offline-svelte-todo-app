@@ -22,8 +22,8 @@ export type Todo = z.infer<typeof todoSchema>;
 
 export const createTodoSchema = z.object({
 	id: z.string().uuid().optional(),
-	title: z.string(),
-	description: z.string().nullable(),
+	title: z.string().trim().min(1),
+	description: z.string().optional(),
 	emoji: z.string().emoji().default('✅')
 });
 
@@ -31,7 +31,7 @@ export type CreateTodo = z.infer<typeof createTodoSchema>;
 
 export const updateTodoSchema = z.object({
 	id: z.string(),
-	title: z.string().optional(),
+	title: z.string().trim().min(1).optional(),
 	description: z.string().optional(),
 	emoji: z.string().emoji().optional(),
 	done: z.boolean().optional()

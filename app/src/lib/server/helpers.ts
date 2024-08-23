@@ -1,6 +1,6 @@
 import { stringify } from 'devalue';
 
-export function customJson(value: unknown, init?: ResponseInit) {
+export function customJson<T = unknown>(value: T, init?: ResponseInit) {
 	const json = stringify(value);
 	return new Response(json, {
 		headers: {

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { TodoQueueService } from '$lib/services/todo-queue.service';
 	import { TodoService } from '$lib/services/todo.service';
 	import { inject } from '$lib/services/di';
 	import { queryKeys } from '$lib/client/query-keys';
@@ -7,7 +6,6 @@
 	import { UserService } from '$lib/services/user.service';
 
 	const todoService = inject(TodoService);
-	const todoQueueService = inject(TodoQueueService);
 	const userService = inject(UserService);
 	const queryClient = useQueryClient();
 
@@ -19,31 +17,24 @@
 	const isLogged = $derived($userQuery.data != null);
 
 	$effect.pre(() => {
-		if (isLogged) {
-			todoService.synchronize().catch(console.error);
-		}
-	});
-
-	$effect.pre(() => {
 		if (!isLogged) {
 			return;
 		}
 
-		async function runPendingTodos() {
+		async function sync() {
 			if (!navigator.onLine) {
 				return;
 			}
 
-			await todoQueueService.runPending();
+			await todoService.synchronize();
 			await queryClient.invalidateQueries();
 		}
 
-		// First run
-		runPendingTodos();
+		sync().catch(console.error);
 
-		window.addEventListener('online', runPendingTodos);
+		window.addEventListener('online', sync);
 		return () => {
-			window.addEventListener('online', runPendingTodos);
+			window.addEventListener('online', sync);
 		};
 	});
 </script>
