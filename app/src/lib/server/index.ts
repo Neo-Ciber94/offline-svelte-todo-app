@@ -135,15 +135,20 @@ export async function deleteTodo(userId: string, todoId: string) {
 }
 
 export async function synchronizeTodos(userId: string, pendingTodos: PendingTodo[]) {
-	await db.run('BEGIN TRANSACTION;');
-
 	const operations: Promise<void>[] = [];
 
+	async function run(f: () => Promise<unknown>) {
+		await f();
+	}
+
 	try {
+		await db.run('BEGIN TRANSACTION');
+
 		for (const pending of pendingTodos) {
 			switch (pending.action.type) {
 				case 'create': {
-					operations.push(Promise.resolve(void createTodo(userId, pending.action.input)));
+					const input = pending.action.input;
+					operations.push(run(() => createTodo(userId, input)));
 					break;
 				}
 				case 'update': {
@@ -154,23 +159,22 @@ export async function synchronizeTodos(userId: string, pendingTodos: PendingTodo
 						emoji: pending.action.input.emoji ?? DEFAULT_EMOJI
 					};
 
-					operations.push(
-						Promise.resolve(void createTodo(userId, input, { onConflict: 'update' }))
-					);
+					operations.push(run(() => createTodo(userId, input, { onConflict: 'update' })));
 					break;
 				}
 				case 'delete': {
-					operations.push(Promise.resolve(void deleteTodo(userId, pending.action.input.id)));
+					const todoId = pending.action.input.id;
+					operations.push(run(() => deleteTodo(userId, todoId)));
 					break;
 				}
 			}
 		}
 
 		await Promise.all(operations);
-		await db.run('COMMIT TRANSACTION;');
+		await db.run('COMMIT TRANSACTION');
 	} catch (err) {
 		console.error(err);
-		await db.run('ROLLBACK;');
+		await db.run('ROLLBACK');
 	}
 
 	return pendingTodos.length;

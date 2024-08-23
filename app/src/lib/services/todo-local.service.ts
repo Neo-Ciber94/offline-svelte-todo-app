@@ -67,7 +67,7 @@ export class LocalTodoService extends TodoServiceInterface {
 			userId: user.id,
 			id: input.id ?? crypto.randomUUID(),
 			title: result.title,
-			description: result.description,
+			description: result.description ?? null,
 			emoji: result.emoji,
 			done: false,
 			createdAt: new Date()
