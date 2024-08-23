@@ -10,9 +10,6 @@ export default defineConfig((config) => {
 		plugins: [
 			sveltekit(),
 			SvelteKitPWA({
-				// strategies: 'injectManifest',
-				// srcDir: 'src',
-				// filename: 'service-worker.ts',
 				registerType: 'autoUpdate',
 				workbox: {
 					navigateFallback: fallback,
