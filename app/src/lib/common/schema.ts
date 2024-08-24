@@ -4,7 +4,7 @@ export const todoSchema = z.object({
 	id: z.string(),
 	userId: z.string(),
 	title: z.string(),
-	description: z.string().nullable(),
+	description: z.string().optional(),
 	emoji: z.string().emoji(),
 	done: z.boolean().default(false),
 	createdAt: z.date().default(() => new Date())

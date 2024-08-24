@@ -5,6 +5,8 @@ CREATE TABLE user (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+---breakpoint
+
 CREATE TABLE todo (
     id TEXT PRIMARY KEY,
     user_id TEXT REFERENCES user(id) NOT NULL,

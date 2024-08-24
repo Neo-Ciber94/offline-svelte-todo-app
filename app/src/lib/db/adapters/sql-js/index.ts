@@ -37,6 +37,7 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		try {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const queryResult = db.exec(sql, params as Record<string, any>);
+			console.log(queryResult);
 
 			if (db.getRowsModified() > 0) {
 				await this.#saveDatabase();
@@ -94,7 +95,8 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		}
 	}
 
-	async deleteDatabase() {
+	async deleteDatabase(opts?: { init: boolean }) {
+		const { init = false } = opts || {};
 		const exists = await this.#storage.read(this.#dbName);
 
 		if (!exists) {
@@ -104,8 +106,14 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		const release = await this.#mutex.lock();
 
 		try {
-			this.#db = Promise.reject(new Error('Database was deleted'));
 			await this.#storage.remove(this.#dbName);
+
+			if (init) {
+				this.#db = SqlJsDatabase.#initDatabase(this.#dbName, this.#storage);
+			} else {
+				this.#db = Promise.reject(new Error('Database was deleted'));
+			}
+
 			return true;
 		} finally {
 			release();
@@ -116,6 +124,7 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		const db = await this.#db;
 		const buffer = db.export();
 		await this.#storage.write(this.#dbName, buffer);
+		console.log('write db');
 	}
 
 	#mapQueryResult(rows: QueryExecResult[]) {

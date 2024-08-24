@@ -39,6 +39,7 @@ export class UserService {
 		const result = userSchema.safeParse(devalue.parse(contents));
 
 		if (result.success) {
+			this.#user = result.data;
 			return result.data;
 		}
 

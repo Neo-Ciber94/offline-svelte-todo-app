@@ -1,3 +1,4 @@
+import { getDb } from '$lib/client/db';
 import { ApplicationError } from '$lib/common/error';
 import {
 	createTodoSchema,
@@ -6,9 +7,9 @@ import {
 	type Todo,
 	type UpdateTodo
 } from '$lib/common/schema';
-import { applyTodosQuery } from '$lib/common/todo.utils';
+import { TodoRepository } from '$lib/data/todo.repository';
 import { inject } from './di';
-import { db } from './local-db';
+// import { db } from './local-db';
 import { NetworkService } from './network-service';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import { NetworkTodoService } from './todo-network.service';
@@ -19,18 +20,37 @@ export class LocalTodoService extends TodoServiceInterface {
 	private networkService = inject(NetworkService);
 	private networkTodoService = inject(NetworkTodoService);
 
+	async #getRepo() {
+		const db = await getDb();
+		return new TodoRepository(db);
+	}
+
 	async synchronize() {
 		if (!this.networkService.isOnline()) {
 			return;
 		}
 
 		try {
+			const user = await this.userService.getCurrentUser();
+
+			if (!user) {
+				return;
+			}
+
 			// Get all the todos over the network
 			const todos = await this.networkTodoService.getAll();
 
+			// Clean database
+			const db = await getDb();
+			await db.deleteDatabase({ init: true });
+
+			// Insert new records
+			const repo = await this.#getRepo();
+			repo.insertMany(user.id, todos);
+
 			// Cleanup the local cache and set the new todos
-			await db.stores.todos.deleteAll();
-			await db.stores.todos.setAll(todos);
+			// await db.stores.todos.deleteAll();
+			// await db.stores.todos.setAll(todos);
 		} catch {
 			// ignore
 		}
@@ -43,15 +63,20 @@ export class LocalTodoService extends TodoServiceInterface {
 			return [];
 		}
 
-		const userId = user.id;
-		const todos = await db.stores.todos.getAll();
-
-		return applyTodosQuery(todos, userId, query);
+		const repo = await this.#getRepo();
+		return repo.getTodos(user.id, query);
 	}
 
 	async getById(todoId: string): Promise<Todo | null> {
-		const todo = await db.stores.todos.getByKey(todoId);
-		return todo ?? null;
+		const user = await this.userService.getCurrentUser();
+
+		if (!user) {
+			throw new ApplicationError(400, 'Failed to get current user');
+		}
+
+		const repo = await this.#getRepo();
+		const result = await repo.getTodoById(user.id, todoId);
+		return result;
 	}
 
 	async insert(input: CreateTodo): Promise<Todo> {
@@ -62,21 +87,8 @@ export class LocalTodoService extends TodoServiceInterface {
 		}
 
 		const result = createTodoSchema.parse(input);
-
-		const newTodo: Todo = {
-			userId: user.id,
-			id: input.id ?? crypto.randomUUID(),
-			title: result.title,
-			description: result.description ?? null,
-			emoji: result.emoji,
-			done: false,
-			createdAt: new Date()
-		};
-
-		// Add the new todo
-		await db.stores.todos.set(newTodo);
-
-		return Object.assign({}, newTodo);
+		const repo = await this.#getRepo();
+		return await repo.insert(user.id, result);
 	}
 
 	async update(input: UpdateTodo): Promise<Todo | null> {
@@ -86,24 +98,9 @@ export class LocalTodoService extends TodoServiceInterface {
 			throw new Error('Failed to get current user');
 		}
 
-		const userId = user.id;
-		const todoToUpdate = await db.stores.todos.getByKey(input.id);
-
-		if (!todoToUpdate || todoToUpdate.userId !== userId) {
-			return null;
-		}
-
 		const result = updateTodoSchema.parse(input);
-
-		todoToUpdate.title = result.title == null ? todoToUpdate.title : result.title;
-		todoToUpdate.description =
-			result.description == null ? todoToUpdate.description : result.description;
-		todoToUpdate.done = result.done == null ? todoToUpdate.done : result.done;
-		todoToUpdate.emoji = result.emoji == null ? todoToUpdate.emoji : result.emoji;
-
-		await db.stores.todos.set(todoToUpdate);
-
-		return todoToUpdate;
+		const repo = await this.#getRepo();
+		return repo.update(user.id, result);
 	}
 
 	async delete(todoId: string): Promise<Todo | null> {
@@ -113,14 +110,7 @@ export class LocalTodoService extends TodoServiceInterface {
 			throw new Error('Failed to get current user');
 		}
 
-		const userId = user.id;
-		const todoToDelete = await db.stores.todos.getByKey(todoId);
-
-		if (todoToDelete == null || todoToDelete.userId !== userId) {
-			return null;
-		}
-
-		await db.stores.todos.delete(todoId);
-		return todoToDelete;
+		const repo = await this.#getRepo();
+		return repo.delete(user.id, todoId);
 	}
 }

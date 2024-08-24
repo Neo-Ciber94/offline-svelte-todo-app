@@ -1,5 +1,5 @@
 import { type CreateTodo, type Todo, type UpdateTodo } from '$lib/common/schema';
-import type { SqliteDatabaseAdapter } from '$lib/server/db/adapters';
+import type { SqliteDatabaseAdapter } from '$lib/db/adapters';
 import type { GetAllTodos } from '$lib/services/todo-interface.service';
 
 type TodoModel = {
@@ -50,18 +50,32 @@ export class TodoRepository {
 		// Ordering
 		const { by = 'created_at', dir = 'asc' } = query?.sort || {};
 		builder.sort = {
-			sql: `:sort_by :sort_dir`,
-			params: {
-				':sort_by': by,
-				':sort_dir': dir
-			}
+			column: by,
+			dir
 		};
 
 		const { sql, params } = queryBuilderToSql(builder);
+		console.log(sql);
 		const result = await this.db.all<TodoModel>(sql, params);
 
 		const values = result.map(mapToTodo);
 		return values;
+	}
+
+	async getTodoById(userId: string, todoId: string) {
+		const todo = await this.db.first<TodoModel>(
+			'SELECT * FROM todo WHERE id = :todo_id AND user_id = :user_id',
+			{
+				':todo_id': todoId,
+				':user_id': userId
+			}
+		);
+
+		if (!todo) {
+			return null;
+		}
+
+		return mapToTodo(todo);
 	}
 
 	async insert(userId: string, input: CreateTodo, opts?: { onConflict?: 'update' }) {
@@ -102,6 +116,50 @@ export class TodoRepository {
 			':done': Number(newTodo.done),
 			':created_at': newTodo.createdAt.getTime()
 		});
+
+		return newTodo;
+	}
+
+	async insertMany(userId: string, inputs: CreateTodo[]) {
+		const newTodos: Todo[] = inputs.map((input) => ({
+			userId,
+			id: input.id ?? crypto.randomUUID(),
+			title: input.title,
+			description: input.description ?? null,
+			emoji: input.emoji,
+			createdAt: new Date(),
+			done: false
+		}));
+
+		const placeholders = newTodos
+			.map((_, index) => {
+				return `(:id_${index}, :user_id_${index}, :title_${index}, :description_${index}, :emoji_${index}, :done_${index}, :created_at_${index})`;
+			})
+			.join(', ');
+
+		const query = `
+			INSERT INTO todo(id, user_id, title, description, emoji, done, created_at) 
+			VALUES ${placeholders}
+		`;
+
+		const params = newTodos.reduce(
+			(acc, todo, index) => {
+				acc[`:id_${index}`] = todo.id;
+				acc[`:user_id_${index}`] = todo.userId;
+				acc[`:title_${index}`] = todo.title;
+				acc[`:description_${index}`] = todo.description;
+				acc[`:emoji_${index}`] = todo.emoji;
+				acc[`:done_${index}`] = Number(todo.done);
+				acc[`:created_at_${index}`] = todo.createdAt.getTime();
+				return acc;
+			},
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			{} as Record<string, any>
+		);
+
+		await this.db.run(query, params);
+
+		return newTodos;
 	}
 
 	async update(userId: string, input: UpdateTodo) {
@@ -163,8 +221,8 @@ type QueryBuilder = {
 		params?: Record<string, unknown>;
 	}[];
 	sort?: {
-		sql: string;
-		params?: Record<string, unknown>;
+		column: string;
+		dir: 'asc' | 'desc';
 	};
 };
 
@@ -173,8 +231,8 @@ function queryBuilderToSql(builder: QueryBuilder) {
 	let sql = builder.select;
 
 	if (builder.where.length > 0) {
-		const expr = builder.where.map((x) => `(${x})`).join(' AND ');
-		sql += `WHERE ${expr}`;
+		const expr = builder.where.map((expr) => `(${expr.sql})`).join(' AND ');
+		sql += ` WHERE ${expr}`;
 
 		builder.where.forEach((expr) => {
 			params = {
@@ -185,14 +243,15 @@ function queryBuilderToSql(builder: QueryBuilder) {
 	}
 
 	if (builder.sort) {
-		sql += `ORDER BY ${builder.sort.sql}`;
-		params = {
-			...params,
-			...builder.sort.params
-		};
+		const dir = builder.sort.dir === 'asc' ? 'ASC' : 'DESC';
+		sql += ` ORDER BY ${escapeIdentifier(builder.sort.column)} ${dir}`;
 	}
 
 	return { sql, params };
+}
+
+function escapeIdentifier(str: string) {
+	return '`' + str.replace(/`/g, '``') + '`';
 }
 
 function mapToTodo(model: TodoModel): Todo {
