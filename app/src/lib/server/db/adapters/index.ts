@@ -17,7 +17,10 @@ export abstract class SqliteDatabaseAdapter {
 	 * @param sql The sql to execute.
 	 * @param params Optional parameters to bind to the query.
 	 */
-	abstract all<T extends unknown[]>(sql: string, params?: Record<string, unknown>): Promise<T[]>;
+	abstract all<T extends Record<string, unknown>>(
+		sql: string,
+		params?: Record<string, unknown>
+	): Promise<T[]>;
 
 	/**
 	 * Run the specified query and ignore the result.

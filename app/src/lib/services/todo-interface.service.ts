@@ -6,7 +6,7 @@ export type GetAllTodos = {
 		search?: string;
 	};
 	sort?: {
-		by?: 'createdAt' | 'title';
+		by?: 'created_at' | 'title';
 		dir?: 'asc' | 'desc';
 	};
 };

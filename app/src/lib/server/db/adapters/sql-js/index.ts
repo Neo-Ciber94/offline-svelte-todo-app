@@ -54,7 +54,10 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		}
 	}
 
-	async all<T extends unknown[]>(sql: string, params?: Record<string, unknown>): Promise<T[]> {
+	async all<T extends Record<string, unknown>>(
+		sql: string,
+		params?: Record<string, unknown>
+	): Promise<T[]> {
 		const db = await this.#db;
 
 		const release = await this.#mutex.lock();

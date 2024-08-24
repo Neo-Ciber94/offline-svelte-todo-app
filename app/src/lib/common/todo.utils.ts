@@ -4,7 +4,7 @@ import type { Todo } from './schema';
 export function applyTodosQuery(todos: Todo[], userId: string, query?: GetAllTodos) {
 	const { filter, sort } = query || {};
 	const search = filter?.search?.toLowerCase();
-	const orderBy = sort?.by || 'createdAt';
+	const orderBy = sort?.by || 'created_at';
 	const orderDir = sort?.dir || 'desc';
 
 	return todos
@@ -31,10 +31,10 @@ export function applyTodosQuery(todos: Todo[], userId: string, query?: GetAllTod
 				case orderBy === 'title' && orderDir === 'asc': {
 					return b.title.localeCompare(b.title);
 				}
-				case orderBy === 'createdAt' && orderDir === 'desc': {
+				case orderBy === 'created_at' && orderDir === 'desc': {
 					return a.createdAt.getTime() - b.createdAt.getTime();
 				}
-				case orderBy === 'createdAt' && orderDir === 'asc': {
+				case orderBy === 'created_at' && orderDir === 'asc': {
 					return b.createdAt.getTime() - a.createdAt.getTime();
 				}
 				default: {
