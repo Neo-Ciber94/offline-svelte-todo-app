@@ -1,12 +1,18 @@
-import { deleteTodo, getTodoById, updateTodo } from '$lib/server';
 import { error, isHttpError } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { customJson } from '$lib/server/helpers';
 import * as devalue from 'devalue';
 import { updateTodoSchema } from '$lib/common/schema';
+import { getTodoById, updateTodo, deleteTodo } from '$lib/server/data/todo';
 
 export const GET: RequestHandler = async (event) => {
-	const result = await getTodoById(event.params.todo_id);
+	const user = event.locals.user;
+
+	if (!user) {
+		error(401, { message: 'Unauthorized' });
+	}
+
+	const result = await getTodoById(user.id, event.params.todo_id);
 
 	if (!result) {
 		error(404, { message: 'Todo not found' });

@@ -20,6 +20,11 @@ export default [
 		}
 	},
 	{
+		rules: {
+			'@typescript/no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }]
+		}
+	},
+	{
 		files: ['**/*.svelte'],
 		languageOptions: {
 			parserOptions: {

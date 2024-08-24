@@ -2,9 +2,9 @@ import { z } from 'zod';
 import type { RequestHandler } from './$types';
 import { pendingTodoSchema } from '$lib/common/schema';
 import { error } from '@sveltejs/kit';
-import { synchronizeTodos } from '$lib/server';
 import * as devalue from 'devalue';
 import { customJson } from '$lib/server/helpers';
+import { synchronizeTodos } from '$lib/server/data/todo';
 
 const pendingTodoArray = z.array(pendingTodoSchema);
 

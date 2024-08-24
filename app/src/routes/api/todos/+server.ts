@@ -1,9 +1,9 @@
-import { createTodo, getTodos } from '$lib/server';
 import { customJson } from '$lib/server/helpers';
 import { error, isHttpError, type RequestHandler } from '@sveltejs/kit';
 import { z } from 'zod';
 import * as devalue from 'devalue';
 import { createTodoSchema } from '$lib/common/schema';
+import { createTodo, getTodos } from '$lib/server/data/todo';
 
 const getAllSchema = z.object({
 	done: z.coerce
