@@ -1,6 +1,6 @@
 import { COOKIE_AUTH_TOKEN } from '$lib/common/constants';
 import { ApplicationError } from '$lib/common/error';
-import { generateUserToken, getUserByUsername } from '$lib/server';
+import { getUserByUsername, generateUserToken } from '$lib/server/data/user';
 import { customJson } from '$lib/server/helpers';
 import { error, isHttpError, type RequestHandler } from '@sveltejs/kit';
 import * as devalue from 'devalue';

@@ -1,5 +1,5 @@
 import { COOKIE_AUTH_TOKEN } from '$lib/common/constants';
-import { getUserByToken } from '$lib/server';
+import { getUserByToken } from '$lib/server/data/user';
 import { customJson } from '$lib/server/helpers';
 import type { RequestHandler } from '@sveltejs/kit';
 
