@@ -17,7 +17,13 @@
     "patch-package"
   ],
   "devDependencies": {
+    "@types/pouchdb": "^6.4.2",
+    "@types/pouchdb-adapter-node-websql": "^6.1.5",
     "patch-package": "^8.0.0",
     "turbo": "^2.0.11"
+  },
+  "dependencies": {
+    "pouchdb": "^9.0.0",
+    "pouchdb-adapter-node-websql": "^7.0.0"
   }
 }
