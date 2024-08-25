@@ -1,7 +1,7 @@
 import { COOKIE_AUTH_TOKEN } from '$lib/common/constants';
 import { ApplicationError } from '$lib/common/error';
 import { registerUser, generateUserToken } from '$lib/server/data/user';
-import { customJson } from '$lib/server/helpers';
+import { toJson } from '$lib/server/helpers';
 import { error, isHttpError, type RequestHandler } from '@sveltejs/kit';
 import * as devalue from 'devalue';
 import { z } from 'zod';
@@ -36,7 +36,7 @@ export const POST: RequestHandler = async (event) => {
 			expires
 		});
 
-		return customJson(user, {
+		return toJson(user, {
 			status: 201
 		});
 	} catch (err) {

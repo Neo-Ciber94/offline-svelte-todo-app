@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { pendingTodoSchema } from '$lib/common/schema';
 import { error } from '@sveltejs/kit';
 import * as devalue from 'devalue';
-import { customJson } from '$lib/server/helpers';
+import { toJson } from '$lib/server/helpers';
 import { synchronizeTodos } from '$lib/server/data/todo';
 
 const pendingTodoArray = z.array(pendingTodoSchema);
@@ -33,5 +33,5 @@ export const POST: RequestHandler = async (event) => {
 
 	const processed = await synchronizeTodos(user.id, result.data);
 
-	return customJson<PendingTodosOutput>({ processed });
+	return toJson<PendingTodosOutput>({ processed });
 };

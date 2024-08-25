@@ -1,6 +1,6 @@
 import { error, isHttpError } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { customJson } from '$lib/server/helpers';
+import { toJson } from '$lib/server/helpers';
 import * as devalue from 'devalue';
 import { updateTodoSchema } from '$lib/common/schema';
 import { getTodoById, updateTodo, deleteTodo } from '$lib/server/data/todo';
@@ -18,7 +18,7 @@ export const GET: RequestHandler = async (event) => {
 		error(404, { message: 'Todo not found' });
 	}
 
-	return customJson(result);
+	return toJson(result);
 };
 
 export const PUT: RequestHandler = async (event) => {
@@ -47,7 +47,7 @@ export const PUT: RequestHandler = async (event) => {
 		}
 
 		const createdTodo = await updateTodo(user.id, result.data);
-		return customJson(createdTodo);
+		return toJson(createdTodo);
 	} catch (err) {
 		if (isHttpError(err)) {
 			throw err;
@@ -72,7 +72,7 @@ export const DELETE: RequestHandler = async (event) => {
 			error(404, { message: 'Todo not found' });
 		}
 
-		return customJson(deleted);
+		return toJson(deleted);
 	} catch (err) {
 		if (isHttpError(err)) {
 			throw err;

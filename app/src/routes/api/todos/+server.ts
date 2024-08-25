@@ -1,4 +1,4 @@
-import { customJson } from '$lib/server/helpers';
+import { toJson } from '$lib/server/helpers';
 import { error, isHttpError, type RequestHandler } from '@sveltejs/kit';
 import { z } from 'zod';
 import * as devalue from 'devalue';
@@ -45,7 +45,7 @@ export const GET: RequestHandler = async (event) => {
 		}
 	});
 
-	return customJson(result);
+	return toJson(result);
 };
 
 export const POST: RequestHandler = async (event) => {
@@ -70,7 +70,7 @@ export const POST: RequestHandler = async (event) => {
 		}
 
 		const createdTodo = await createTodo(user.id, result.data);
-		return customJson(createdTodo);
+		return toJson(createdTodo);
 	} catch (err) {
 		if (isHttpError(err)) {
 			throw err;
