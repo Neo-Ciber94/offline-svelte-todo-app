@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { RequestHandler } from './$types';
+import type { RequestHandler } from '../$types';
 import { pendingTodoSchema } from '$lib/common/schema';
 import { error } from '@sveltejs/kit';
 import * as devalue from 'devalue';
@@ -8,9 +8,9 @@ import { synchronizeTodos } from '$lib/server/data/todo';
 
 const pendingTodoArray = z.array(pendingTodoSchema);
 
-export type SyncTodosInput = z.infer<typeof pendingTodoArray>;
+export type SyncPushTodosInput = z.infer<typeof pendingTodoArray>;
 
-export type SyncTodosOutput = {
+export type SyncPushTodosOutput = {
 	processed: number;
 };
 
@@ -35,5 +35,5 @@ export const POST: RequestHandler = async (event) => {
 
 	const processed = await synchronizeTodos(user.id, result.data);
 
-	return toJson<SyncTodosOutput>({ processed });
+	return toJson<SyncPushTodosOutput>({ processed });
 };

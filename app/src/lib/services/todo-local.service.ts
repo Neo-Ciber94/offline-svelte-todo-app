@@ -37,7 +37,7 @@ export class LocalTodoService extends TodoServiceInterface {
 			await recreateDatabase();
 
 			// Insert all the user todos
-			const todos = await this.networkTodoService.getAll();
+			const todos = await this.networkTodoService.pull();
 			const repo = await this.todoRepository;
 			await repo.insertMany(user.id, todos);
 		} catch (err) {
