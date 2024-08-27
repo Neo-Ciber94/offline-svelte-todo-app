@@ -8,6 +8,7 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 	#mutex = new Mutex();
 	#storage: SqlJsStorage;
 	#dbName: string;
+	#canWrite = true;
 
 	constructor(dbName: string, storage: SqlJsStorage = new IndexDbSqlJsStorage()) {
 		super();
@@ -26,6 +27,14 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		return new SQL.Database(buffer);
 	}
 
+	get autoWritable() {
+		return this.#canWrite;
+	}
+
+	set autoWritable(value: boolean) {
+		this.#canWrite = value;
+	}
+
 	async first<T extends Record<string, unknown>>(
 		sql: string,
 		params?: Record<string, unknown>
@@ -37,13 +46,10 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		try {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const queryResult = db.exec(sql, params as Record<string, any>);
-			console.log(queryResult);
-
-			if (db.getRowsModified() > 0) {
-				await this.#saveDatabase();
-			}
-
 			const first = queryResult[0];
+
+			await this.#tryWriteDatabase();
+
 			if (first == null) {
 				return undefined;
 			}
@@ -66,12 +72,9 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		try {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const queryResult = db.exec(sql, params as Record<string, any>);
-
-			if (db.getRowsModified() > 0) {
-				await this.#saveDatabase();
-			}
-
 			const rows = this.#mapQueryResult(queryResult);
+
+			await this.#tryWriteDatabase();
 			return rows as T[];
 		} finally {
 			release();
@@ -86,10 +89,7 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		try {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			db.run(sql, params as Record<string, any>);
-
-			if (db.getRowsModified() > 0) {
-				await this.#saveDatabase();
-			}
+			await this.#tryWriteDatabase();
 		} finally {
 			release();
 		}
@@ -114,7 +114,19 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		}
 	}
 
-	async #saveDatabase() {
+	async #tryWriteDatabase() {
+		const db = await this.#db;
+
+		if (db.getRowsModified() > 0) {
+			await this.saveDatabase();
+		}
+	}
+
+	async saveDatabase() {
+		if (!this.#canWrite) {
+			return;
+		}
+
 		const db = await this.#db;
 		const buffer = db.export();
 		await this.#storage.write(this.#dbName, buffer);

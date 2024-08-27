@@ -41,8 +41,13 @@ async function checkMigrations(db: SqlJsDatabase) {
 	if (!exists) {
 		console.log('🕒 Running migrations...');
 
+		// We disable auto writes here
+		db.autoWritable = false;
+
 		try {
+	
 			await db.run('BEGIN TRANSACTION');
+
 			const parts = migrationSql.split('---breakpoint').map((x) => x.trim());
 
 			for (const sql of parts) {
@@ -56,12 +61,17 @@ async function checkMigrations(db: SqlJsDatabase) {
 			});
 
 			await db.run('COMMIT TRANSACTION');
+			
+			// We manually write the database
+			await db.saveDatabase();
 			console.log('✅ Applied migrations');
 		} catch (err) {
 			console.error(err);
 			await db.run('ROLLBACK');
 			console.log('❌ Failed to apply migrations');
-		} 
+		} finally {
+			db.autoWritable = true;
+		}
 	}
 }
 
