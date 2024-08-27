@@ -68,7 +68,7 @@ export class TodoQueueService {
 			console.error(contents);
 			throw new ApplicationError(400, 'Failed to process pending todos');
 		} else {
-			await db.stores.pendingTodos.deleteAll();
+			this.pendingTodosStorage.removeItem();
 		}
 
 		const result = devalue.parse(contents) as SyncTodosOutput;

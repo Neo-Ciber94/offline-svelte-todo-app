@@ -140,13 +140,8 @@ class ServerTodoRepository implements TodoRepository {
 						break;
 					}
 					case 'update': {
-						const input: CreateTodo = {
-							...pending.action.input,
-							title: pending.action.input.title ?? '<empty>',
-							emoji: pending.action.input.emoji ?? DEFAULT_EMOJI
-						};
-
-						operations.push(run(() => this.createTodo(userId, input, { onConflict: 'update' })));
+						const input = pending.action.input;
+						operations.push(run(() => this.updateTodo(userId, input)));
 						break;
 					}
 					case 'delete': {
