@@ -3,11 +3,6 @@ import type { GetAllTodos } from '$lib/services/todo-interface.service';
 import { z } from 'zod';
 import type { TodoRepository } from './todo.repository';
 import PouchDB from 'pouchdb';
-// import PouchDBAdapterNodeWebSql from 'pouchdb-adapter-node-websql';
-
-// PouchDB.plugin(PouchDBAdapterNodeWebSql);
-
-// const db = new PouchDB('data.db', { adapter: 'websql' });
 
 const todoModelSchema = z.object({
 	_id: z.string(),
@@ -24,7 +19,7 @@ const todoModelListSchema = z.array(todoModelSchema.optional().catch(() => undef
 type TodoModel = z.infer<typeof todoModelSchema>;
 
 export class PouchDbTodoRepository implements TodoRepository {
-    constructor(private readonly db: PouchDB.Database){}
+	constructor(private readonly db: PouchDB.Database) {}
 
 	async getTodos(userId: string, query?: GetAllTodos): Promise<Todo[]> {
 		const { filter, sort } = query || {};

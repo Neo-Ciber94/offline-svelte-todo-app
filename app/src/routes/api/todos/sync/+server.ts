@@ -35,3 +35,13 @@ export const POST: RequestHandler = async (event) => {
 
 	return toJson<PendingTodosOutput>({ processed });
 };
+
+export const GET: RequestHandler = async (event) => {
+	const user = event.locals.user;
+
+	if (!user) {
+		error(401, { message: 'Unauthorized' });
+	}
+
+	return new Response();
+};

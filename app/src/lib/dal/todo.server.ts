@@ -4,6 +4,8 @@ import { applyTodosQuery } from '$lib/common/todo.utils';
 import type { GetAllTodos } from '$lib/services/todo-interface.service';
 import { db } from '$lib/server/db';
 import type { TodoRepository } from './todo.repository';
+import { PouchDbTodoRepository } from './todo-pouchdb';
+import { serverPouchDb } from './pouchdb.server';
 
 type TodoModel = {
 	id: string;
@@ -180,4 +182,5 @@ class ServerTodoRepository implements TodoRepository {
 	}
 }
 
-export const todosRepository = new ServerTodoRepository();
+// export const todosRepository = new ServerTodoRepository();
+export const todosRepository = new PouchDbTodoRepository(serverPouchDb);
