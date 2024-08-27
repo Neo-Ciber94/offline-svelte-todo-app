@@ -3,24 +3,6 @@ import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service
 import * as devalue from 'devalue';
 
 export class NetworkTodoService extends TodoServiceInterface {
-	synchronize(): Promise<void> {
-		return Promise.resolve();
-	}
-
-	async pull(): Promise<Todo[]> {
-		const res = await fetch('/api/todos/sync/pull');
-		const contents = await res.text();
-
-		if (!res.ok) {
-			const json = JSON.parse(contents);
-			const error = typeof json?.message === 'string' ? json.message : 'Something went wrong';
-			throw new Error(error);
-		}
-
-		const json = devalue.parse(contents);
-		return json as Todo[];
-	}
-
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
 		const { filter, sort } = query || {};
 		const searchParams = new URLSearchParams();

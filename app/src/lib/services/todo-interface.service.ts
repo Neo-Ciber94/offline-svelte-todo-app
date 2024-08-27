@@ -12,7 +12,6 @@ export type GetAllTodos = {
 };
 
 export abstract class TodoServiceInterface {
-	abstract synchronize(): Promise<void>;
 	abstract getAll(query?: GetAllTodos): Promise<Todo[]>;
 	abstract getById(todoId: string): Promise<Todo | null>;
 	abstract insert(input: CreateTodo): Promise<Todo>;

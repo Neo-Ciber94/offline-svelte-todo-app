@@ -8,35 +8,37 @@ import { TodoQueueService } from './todo-queue.service';
 
 export class TodoService extends TodoServiceInterface {
 	private readonly networkService = inject(NetworkService);
-	private readonly local = inject(LocalTodoService);
-	private readonly network = inject(NetworkTodoService);
-	private readonly pendingQueue = inject(TodoQueueService);
+	private readonly localTodos = inject(LocalTodoService);
+	private readonly networkTodos = inject(NetworkTodoService);
+	private readonly todosQueue = inject(TodoQueueService);
 
 	async synchronize() {
-		await this.local.synchronize();
-
-		const resolvedCount = await this.pendingQueue.push();
+		// Push any pending todos to the server
+		const resolvedCount = await this.todosQueue.push();
 
 		if (resolvedCount) {
 			console.log(`✅ pending todos where resolved`);
 		}
+
+		// Pull all the todos from the server and merge with the current
+		await this.todosQueue.pull();
 	}
 
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
 		if (!this.networkService.isOnline()) {
-			const result = await this.local.getAll(query);
+			const result = await this.localTodos.getAll(query);
 			return result;
 		}
 
-		return this.network.getAll(query);
+		return this.networkTodos.getAll(query);
 	}
 
 	async getById(todoId: string): Promise<Todo | null> {
 		if (!this.networkService.isOnline()) {
-			return this.local.getById(todoId);
+			return this.localTodos.getById(todoId);
 		}
 
-		return this.network.getById(todoId);
+		return this.networkTodos.getById(todoId);
 	}
 
 	async insert(input: CreateTodo): Promise<Todo> {
@@ -44,8 +46,8 @@ export class TodoService extends TodoServiceInterface {
 		input.id ??= crypto.randomUUID();
 
 		if (!this.networkService.isOnline()) {
-			const newTodo = await this.local.insert(input);
-			this.pendingQueue
+			const newTodo = await this.localTodos.insert(input);
+			this.todosQueue
 				.enqueue({ id: newTodo.id, action: { type: 'create', input } })
 				.catch(console.error);
 
@@ -53,41 +55,41 @@ export class TodoService extends TodoServiceInterface {
 		}
 
 		// Update local first
-		await this.local.insert(input);
+		await this.localTodos.insert(input);
 
-		const result = await this.network.insert(input);
+		const result = await this.networkTodos.insert(input);
 		return result;
 	}
 
 	async update(input: UpdateTodo): Promise<Todo | null> {
 		if (!this.networkService.isOnline()) {
-			this.pendingQueue
+			this.todosQueue
 				.enqueue({ id: input.id, action: { type: 'update', input: input } })
 				.catch(console.error);
 
-			return this.local.update(input);
+			return this.localTodos.update(input);
 		}
 
 		// Update local first
-		await this.local.update(input);
+		await this.localTodos.update(input);
 
-		const result = await this.network.update(input);
+		const result = await this.networkTodos.update(input);
 		return result;
 	}
 
 	async delete(todoId: string): Promise<Todo | null> {
 		if (!this.networkService.isOnline()) {
-			this.pendingQueue
+			this.todosQueue
 				.enqueue({ id: todoId, action: { type: 'delete', input: { id: todoId } } })
 				.catch(console.error);
 
-			return this.local.delete(todoId);
+			return this.localTodos.delete(todoId);
 		}
 
 		// Update local first
-		await this.local.delete(todoId);
+		await this.localTodos.delete(todoId);
 
-		const result = await this.network.delete(todoId);
+		const result = await this.networkTodos.delete(todoId);
 		return result;
 	}
 }
