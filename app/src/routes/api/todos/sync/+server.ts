@@ -8,7 +8,9 @@ import { synchronizeTodos } from '$lib/server/data/todo';
 
 const pendingTodoArray = z.array(pendingTodoSchema);
 
-export type PendingTodosOutput = {
+export type SyncTodosInput = z.infer<typeof pendingTodoArray>;
+
+export type SyncTodosOutput = {
 	processed: number;
 };
 
@@ -33,5 +35,5 @@ export const POST: RequestHandler = async (event) => {
 
 	const processed = await synchronizeTodos(user.id, result.data);
 
-	return toJson<PendingTodosOutput>({ processed });
+	return toJson<SyncTodosOutput>({ processed });
 };

@@ -98,7 +98,7 @@ async function checkMigrations(db: SqlJsDatabase) {
 	}
 
 	// Insert the user and ignore if exists
-	await db.run('INSERT INTO user(id, username, created_at) VALUES (:id, :username, :created_at) ON CONFLICT IGNORE', {
+	await db.run('INSERT OR IGNORE INTO user(id, username, created_at) VALUES (:id, :username, :created_at)', {
 		':id': user.id,
 		':username': user.username,
 		':created_at': user.createdAt.getTime()
