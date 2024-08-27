@@ -1,6 +1,6 @@
 import { Mutex } from '$lib/common/mutex';
 import { SqliteDatabaseAdapter } from '..';
-import initSqlJs, { type Database, type QueryExecResult } from 'sql.js';
+import initSqlJs, { type Database } from 'sql.js';
 import { IndexDbSqlJsStorage, type SqlJsStorage } from './storage';
 
 export class SqlJsDatabase extends SqliteDatabaseAdapter {
@@ -44,18 +44,9 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		const release = await this.#mutex.lock();
 
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const queryResult = db.exec(sql, params as Record<string, any>);
-			const first = queryResult[0];
-
+			const rows = await this.#queryAndGetResult<T>(db, sql, params);
 			await this.#tryWriteDatabase();
-
-			if (first == null) {
-				return undefined;
-			}
-
-			const row = this.#mapQueryResult([first])[0];
-			return row as T;
+			return rows[0];
 		} finally {
 			release();
 		}
@@ -70,12 +61,9 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		const release = await this.#mutex.lock();
 
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const queryResult = db.exec(sql, params as Record<string, any>);
-			const rows = this.#mapQueryResult(queryResult);
-
+			const rows = await this.#queryAndGetResult<T>(db, sql, params);
 			await this.#tryWriteDatabase();
-			return rows as T[];
+			return rows;
 		} finally {
 			release();
 		}
@@ -87,7 +75,6 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		const release = await this.#mutex.lock();
 
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			db.run(sql, params as Record<string, any>);
 			await this.#tryWriteDatabase();
 		} finally {
@@ -130,24 +117,22 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		const db = await this.#db;
 		const buffer = db.export();
 		await this.#storage.write(this.#dbName, buffer);
-		console.log('write db');
 	}
 
-	#mapQueryResult(rows: QueryExecResult[]) {
-		const values: Record<string, unknown>[] = [];
+	#queryAndGetResult<T>(db: Database, sql: string, params?: Record<string, unknown>) {
+		return new Promise<T[]>((resolve, reject) => {
+			const data: T[] = [];
 
-		for (const [rowIdx, row] of rows.entries()) {
-			const obj: Record<string, unknown> = {};
-			const columns = row.columns;
-			const rowValues = row.values[rowIdx];
-
-			for (const [idx, col] of columns.entries()) {
-				obj[col] = rowValues[idx];
+			try {
+				db.each(
+					sql,
+					params as Record<string, any>,
+					(row) => data.push(row as T),
+					() => resolve(data)
+				);
+			} catch (err) {
+				reject(err);
 			}
-
-			values.push(obj);
-		}
-
-		return values;
+		});
 	}
 }

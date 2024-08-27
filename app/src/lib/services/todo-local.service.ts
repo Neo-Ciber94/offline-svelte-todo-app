@@ -1,4 +1,4 @@
-import { getDb } from '$lib/client/db';
+import { getDb, recreateDatabase } from '$lib/client/db';
 import { ApplicationError } from '$lib/common/error';
 import {
 	createTodoSchema,
@@ -30,28 +30,29 @@ export class LocalTodoService extends TodoServiceInterface {
 			return;
 		}
 
+		const user = await this.userService.getCurrentUser();
+
+		if (!user) {
+			return;
+		}
+
 		try {
-			const user = await this.userService.getCurrentUser();
+			await recreateDatabase();
 
-			if (!user) {
-				return;
-			}
+			const db = await getDb();
 
-			// Get all the todos over the network
+			// Insert current user
+			await db.run('INSERT INTO user(id,username,created_at) VALUES (:id,:username,:created_at)', {
+				':id': user.id,
+				':username': user.username,
+				':created_at': user.createdAt.getTime()
+			});
+
+			// Insert new records
 			const todos = await this.networkTodoService.getAll();
-
-			// Clean database
-			// const db = await getDb();
-			// await db.deleteDatabase();
-
-			// // Insert new records
-			// const repo = await this.#getRepo();
-			// repo.insertMany(user.id, todos);
-
-			// Cleanup the local cache and set the new todos
-			// await db.stores.todos.deleteAll();
-			// await db.stores.todos.setAll(todos);
-		} catch {
+			const repo = await this.#getRepo();
+			await repo.insertMany(user.id, todos);
+		} catch (err) {
 			// ignore
 		}
 	}

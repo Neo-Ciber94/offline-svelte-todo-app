@@ -21,6 +21,17 @@ export async function getDb() {
 	return instance;
 }
 
+export async function recreateDatabase() {
+	const db = await getDb();
+
+	// We disable auto writes here
+	await db.run('DROP TABLE __migration');
+	await db.run('DROP TABLE todo');
+	await db.run('DROP TABLE user');
+
+	await checkMigrations(db);
+}
+
 async function checkMigrations(db: SqlJsDatabase) {
 	// Check for migrations
 
@@ -45,7 +56,6 @@ async function checkMigrations(db: SqlJsDatabase) {
 		db.autoWritable = false;
 
 		try {
-	
 			await db.run('BEGIN TRANSACTION');
 
 			const parts = migrationSql.split('---breakpoint').map((x) => x.trim());
@@ -61,7 +71,7 @@ async function checkMigrations(db: SqlJsDatabase) {
 			});
 
 			await db.run('COMMIT TRANSACTION');
-			
+
 			// We manually write the database
 			await db.saveDatabase();
 			console.log('✅ Applied migrations');

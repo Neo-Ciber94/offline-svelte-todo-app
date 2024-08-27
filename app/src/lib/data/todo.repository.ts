@@ -55,10 +55,9 @@ export class TodoRepository {
 		};
 
 		const { sql, params } = queryBuilderToSql(builder);
-		console.log(sql);
 		const result = await this.db.all<TodoModel>(sql, params);
 
-		const values = result.map(mapToTodo);
+		const values = result.map(x => mapToTodo(x));
 		return values;
 	}
 
@@ -84,7 +83,7 @@ export class TodoRepository {
 			userId,
 			id: input.id ?? crypto.randomUUID(),
 			title: input.title,
-			description: input.description ?? null,
+			description: input.description ?? undefined,
 			emoji: input.emoji,
 			createdAt: new Date(),
 			done: false
@@ -125,7 +124,7 @@ export class TodoRepository {
 			userId,
 			id: input.id ?? crypto.randomUUID(),
 			title: input.title,
-			description: input.description ?? null,
+			description: input.description,
 			emoji: input.emoji,
 			createdAt: new Date(),
 			done: false
@@ -258,7 +257,7 @@ function mapToTodo(model: TodoModel): Todo {
 	return {
 		id: model.id,
 		title: model.title,
-		description: model.description,
+		description: model.description ?? undefined,
 		emoji: model.emoji,
 		done: Boolean(model.done),
 		userId: model.user_id,
