@@ -1,4 +1,6 @@
 import { SqlJsDatabase } from '$lib/db/adapters/sql-js';
+import { inject } from '$lib/services/di';
+import { UserService } from '$lib/services/user.service';
 import migrationSql from '../../../migrations/001_initial.sql?raw';
 
 type Migration = {
@@ -13,9 +15,11 @@ export async function getDb() {
 		return instance;
 	}
 
-	instance = new Promise<SqlJsDatabase>((resolve) => {
+	instance = new Promise<SqlJsDatabase>((resolve, reject) => {
 		const db = new SqlJsDatabase('data.db');
-		checkMigrations(db).then(() => resolve(db));
+		checkMigrations(db)
+			.then(() => resolve(db))
+			.catch(reject);
 	});
 
 	return instance;
@@ -83,6 +87,22 @@ async function checkMigrations(db: SqlJsDatabase) {
 			db.autoWritable = true;
 		}
 	}
+
+	// Try insert the current user in the database
+	const userService = inject(UserService);
+	const user = await userService.getCurrentUser();
+
+	// Nothing to do if there is not user
+	if (!user) {
+		return;
+	}
+
+	// Insert the user and ignore if exists
+	await db.run('INSERT INTO user(id, username, created_at) VALUES (:id, :username, :created_at) ON CONFLICT IGNORE', {
+		':id': user.id,
+		':username': user.username,
+		':created_at': user.createdAt.getTime()
+	});
 }
 
 async function hashSha1(input: string) {

@@ -19,11 +19,7 @@ export class LocalTodoService extends TodoServiceInterface {
 	private userService = inject(UserService);
 	private networkService = inject(NetworkService);
 	private networkTodoService = inject(NetworkTodoService);
-
-	async #getRepo() {
-		const db = await getDb();
-		return new TodoRepository(db);
-	}
+	private todoRepository = getDb().then((db) => new TodoRepository(db));
 
 	async synchronize() {
 		if (!this.networkService.isOnline()) {
@@ -37,20 +33,12 @@ export class LocalTodoService extends TodoServiceInterface {
 		}
 
 		try {
+			// Drop all and run migrations again
 			await recreateDatabase();
 
-			const db = await getDb();
-
-			// Insert current user
-			await db.run('INSERT INTO user(id,username,created_at) VALUES (:id,:username,:created_at)', {
-				':id': user.id,
-				':username': user.username,
-				':created_at': user.createdAt.getTime()
-			});
-
-			// Insert new records
+			// Insert all the user todos
 			const todos = await this.networkTodoService.getAll();
-			const repo = await this.#getRepo();
+			const repo = await this.todoRepository;
 			await repo.insertMany(user.id, todos);
 		} catch (err) {
 			// ignore
@@ -64,7 +52,7 @@ export class LocalTodoService extends TodoServiceInterface {
 			return [];
 		}
 
-		const repo = await this.#getRepo();
+		const repo = await this.todoRepository;
 		return repo.getTodos(user.id, query);
 	}
 
@@ -75,7 +63,7 @@ export class LocalTodoService extends TodoServiceInterface {
 			throw new ApplicationError(400, 'Failed to get current user');
 		}
 
-		const repo = await this.#getRepo();
+		const repo = await this.todoRepository;
 		const result = await repo.getTodoById(user.id, todoId);
 		return result;
 	}
@@ -88,7 +76,7 @@ export class LocalTodoService extends TodoServiceInterface {
 		}
 
 		const result = createTodoSchema.parse(input);
-		const repo = await this.#getRepo();
+		const repo = await this.todoRepository;
 		return await repo.insert(user.id, result);
 	}
 
@@ -100,7 +88,7 @@ export class LocalTodoService extends TodoServiceInterface {
 		}
 
 		const result = updateTodoSchema.parse(input);
-		const repo = await this.#getRepo();
+		const repo = await this.todoRepository;
 		return repo.update(user.id, result);
 	}
 
@@ -111,7 +99,7 @@ export class LocalTodoService extends TodoServiceInterface {
 			throw new Error('Failed to get current user');
 		}
 
-		const repo = await this.#getRepo();
+		const repo = await this.todoRepository;
 		return repo.delete(user.id, todoId);
 	}
 }
