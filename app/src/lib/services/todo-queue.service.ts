@@ -6,7 +6,7 @@ import type {
 	SyncPushTodosInput
 } from '../../routes/api/todos/sync/push/+server';
 import { inject } from './di';
-import { NetworkService } from './network-service';
+import { ConnectivityService } from './network-service';
 import * as devalue from 'devalue';
 import { createStorage } from '$lib/client/createStorage';
 import { getDb, recreateDatabase } from '$lib/client/db';
@@ -17,7 +17,7 @@ const syncTodosSchema = z.record(z.string(), pendingTodoSchema).catch(() => ({})
 
 export class TodoQueueService {
 	private pendingTodosStorage = createStorage('pending-todos', { schema: syncTodosSchema });
-	private networkService = inject(NetworkService);
+	private connectivity = inject(ConnectivityService);
 	private userService = inject(UserService);
 	private todoRepository = getDb().then((db) => new TodoRepository(db));
 
@@ -57,7 +57,7 @@ export class TodoQueueService {
 	}
 
 	async pull() {
-		if (!this.networkService.isOnline()) {
+		if (!this.connectivity.isOnline()) {
 			return;
 		}
 
@@ -93,7 +93,7 @@ export class TodoQueueService {
 		const data = this.pendingTodosStorage.getItem() || {};
 		const pendingTodos = Object.values(data);
 
-		if (!this.networkService.isOnline()) {
+		if (!this.connectivity.isOnline()) {
 			return pendingTodos.length;
 		}
 
