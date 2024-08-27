@@ -15,7 +15,7 @@ export class TodoService extends TodoServiceInterface {
 	async synchronize() {
 		await this.local.synchronize();
 
-		const resolvedCount = await this.pendingQueue.runPending();
+		const resolvedCount = await this.pendingQueue.push();
 
 		if (resolvedCount) {
 			console.log(`✅ pending todos where resolved`);

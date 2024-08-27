@@ -15,7 +15,7 @@ const getAllSchema = z.object({
 		.optional()
 		.catch(() => undefined),
 	sortBy: z
-		.enum(['createdAt', 'title'])
+		.enum(['created_at', 'title'])
 		.optional()
 		.catch(() => undefined),
 	sortDir: z
