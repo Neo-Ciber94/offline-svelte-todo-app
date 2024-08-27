@@ -1,7 +1,7 @@
 import type { z, ZodType } from 'zod';
 import * as devalue from 'devalue';
 
-type CreateTypedStorageOptions<S> = {
+type CreateStorageOptions<S> = {
 	schema: S;
 	storage?: Storage;
 };
@@ -14,10 +14,7 @@ function getDefaultStorage() {
 	return localStorage;
 }
 
-export function createTypedStorage<S extends ZodType>(
-	key: string,
-	options: CreateTypedStorageOptions<S>
-) {
+export function createStorage<S extends ZodType>(key: string, options: CreateStorageOptions<S>) {
 	const { schema, storage = getDefaultStorage() } = options;
 
 	function setItem(value: z.infer<S>) {

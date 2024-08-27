@@ -1,17 +1,20 @@
 import { ApplicationError } from '$lib/common/error';
 import { pendingTodoSchema, type PendingTodo } from '$lib/common/schema';
 import { z } from 'zod';
-import type { SyncPushTodosOutput, SyncPushTodosInput } from '../../routes/api/todos/sync/push/+server';
+import type {
+	SyncPushTodosOutput,
+	SyncPushTodosInput
+} from '../../routes/api/todos/sync/push/+server';
 import { inject } from './di';
 import { NetworkService } from './network-service';
 import * as devalue from 'devalue';
-import { createTypedStorage } from '$lib/client/createTypedStorage';
+import { createStorage } from '$lib/client/createStorage';
 
 const syncTodosSchema = z.record(z.string(), pendingTodoSchema);
 
 export class TodoQueueService {
 	private networkService = inject(NetworkService);
-	private pendingTodosStorage = createTypedStorage('pending-todos', { schema: syncTodosSchema });
+	private pendingTodosStorage = createStorage('pending-todos', { schema: syncTodosSchema });
 
 	async enqueue(pending: PendingTodo): Promise<void> {
 		const pendingTodos = this.pendingTodosStorage.getItem() || {};
