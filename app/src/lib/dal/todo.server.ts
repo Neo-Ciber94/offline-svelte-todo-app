@@ -45,7 +45,7 @@ class ServerTodoRepository implements TodoRepository {
 			userId,
 			id: input.id ?? crypto.randomUUID(),
 			title: input.title,
-			description: input.description ?? null,
+			description: input.description ?? undefined,
 			emoji: input.emoji,
 			createdAt: new Date(),
 			done: false
@@ -171,7 +171,7 @@ class ServerTodoRepository implements TodoRepository {
 		return {
 			id: model.id,
 			userId: model.user_id,
-			description: model.description,
+			description: model.description ?? undefined,
 			emoji: model.emoji,
 			done: Boolean(model.done),
 			title: model.title,
