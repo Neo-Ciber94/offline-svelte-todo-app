@@ -41,12 +41,12 @@ export class LocalTodoService extends TodoServiceInterface {
 			const todos = await this.networkTodoService.getAll();
 
 			// Clean database
-			const db = await getDb();
-			await db.deleteDatabase({ init: true });
+			// const db = await getDb();
+			// await db.deleteDatabase();
 
-			// Insert new records
-			const repo = await this.#getRepo();
-			repo.insertMany(user.id, todos);
+			// // Insert new records
+			// const repo = await this.#getRepo();
+			// repo.insertMany(user.id, todos);
 
 			// Cleanup the local cache and set the new todos
 			// await db.stores.todos.deleteAll();

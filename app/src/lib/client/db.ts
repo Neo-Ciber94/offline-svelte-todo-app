@@ -42,9 +42,7 @@ async function checkMigrations(db: SqlJsDatabase) {
 		console.log('🕒 Running migrations...');
 
 		try {
-			await db.run('PRAGMA foreign_keys=OFF');
-
-			//await db.run('BEGIN TRANSACTION');
+			await db.run('BEGIN TRANSACTION');
 			const parts = migrationSql.split('---breakpoint').map((x) => x.trim());
 
 			for (const sql of parts) {
@@ -57,15 +55,13 @@ async function checkMigrations(db: SqlJsDatabase) {
 				':hash': migrationHash
 			});
 
-			//await db.run('COMMIT TRANSACTION');
+			await db.run('COMMIT TRANSACTION');
 			console.log('✅ Applied migrations');
 		} catch (err) {
 			console.error(err);
-			//await db.run('ROLLBACK');
+			await db.run('ROLLBACK');
 			console.log('❌ Failed to apply migrations');
-		} finally {
-			await db.run('PRAGMA foreign_keys=ON');
-		}
+		} 
 	}
 }
 

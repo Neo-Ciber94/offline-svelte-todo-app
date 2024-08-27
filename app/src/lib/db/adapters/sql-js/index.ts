@@ -95,8 +95,7 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 		}
 	}
 
-	async deleteDatabase(opts?: { init: boolean }) {
-		const { init = false } = opts || {};
+	async deleteDatabase() {
 		const exists = await this.#storage.read(this.#dbName);
 
 		if (!exists) {
@@ -107,12 +106,7 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 
 		try {
 			await this.#storage.remove(this.#dbName);
-
-			if (init) {
-				this.#db = SqlJsDatabase.#initDatabase(this.#dbName, this.#storage);
-			} else {
-				this.#db = Promise.reject(new Error('Database was deleted'));
-			}
+			this.#db = Promise.reject(new Error('Database was deleted'));
 
 			return true;
 		} finally {
