@@ -1,6 +1,6 @@
 import { building } from '$app/environment';
 import { COOKIE_AUTH_TOKEN } from '$lib/common/constants';
-import { getUserByToken } from '$lib/server';
+import { getUserByToken } from '$lib/server/data/user';
 import { type Cookies, type Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {

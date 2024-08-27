@@ -40,7 +40,7 @@ export class UserService {
 
 		if (result.success) {
 			this.#user = result.data;
-			return result.data;
+			return this.#user;
 		}
 
 		await del(CURRENT_USER_KEY);

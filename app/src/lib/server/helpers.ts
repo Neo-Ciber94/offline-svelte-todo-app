@@ -1,6 +1,11 @@
 import { stringify } from 'devalue';
 
-export function customJson<T = unknown>(value: T, init?: ResponseInit) {
+/**
+ * Create a JSON response using `devalue` from the given value.
+ * @param value The value to convert to json.
+ * @param init The response init.
+ */
+export function toJson<T = unknown>(value: T, init?: ResponseInit) {
 	const json = stringify(value);
 	return new Response(json, {
 		headers: {
