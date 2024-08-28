@@ -40,7 +40,6 @@ class ServerTodoRepository implements TodoRepository {
 		input: CreateTodo,
 		opts?: { onConflict?: 'update' }
 	): Promise<Todo> {
-		const { onConflict } = opts || {};
 		const newTodo: Todo = {
 			userId,
 			id: input.id ?? crypto.randomUUID(),
@@ -50,6 +49,13 @@ class ServerTodoRepository implements TodoRepository {
 			createdAt: new Date(),
 			done: false
 		};
+
+		const result = await this.setTodo(newTodo, opts);
+		return result;
+	}
+
+	private async setTodo(newTodo: Todo, opts?: { onConflict?: 'update' }): Promise<Todo> {
+		const { onConflict } = opts || {};
 
 		let query = `
 			INSERT INTO todo(id, user_id, title, description, emoji, done, created_at) 
@@ -136,7 +142,17 @@ class ServerTodoRepository implements TodoRepository {
 				switch (pending.action.type) {
 					case 'create': {
 						const input = pending.action.input;
-						operations.push(run(() => this.createTodo(userId, input)));
+						const newTodo: Todo = {
+							userId,
+							id: input.id ?? crypto.randomUUID(),
+							title: input.title,
+							description: input.description ?? undefined,
+							emoji: input.emoji,
+							createdAt: input.createdAt ?? new Date(),
+							done: input.done == null ? false : input.done
+						};
+
+						operations.push(run(() => this.setTodo(newTodo)));
 						break;
 					}
 					case 'update': {

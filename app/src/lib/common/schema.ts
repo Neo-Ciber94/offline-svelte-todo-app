@@ -48,7 +48,12 @@ export const pendingTodoSchema = z.object({
 	action: z.discriminatedUnion('type', [
 		z.object({
 			type: z.literal('create'),
-			input: createTodoSchema
+			input: createTodoSchema.merge(
+				z.object({
+					done: z.boolean().optional(),
+					createdAt: z.date().optional()
+				})
+			)
 		}),
 		z.object({
 			type: z.literal('update'),
