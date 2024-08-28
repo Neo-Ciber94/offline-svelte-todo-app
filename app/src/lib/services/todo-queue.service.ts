@@ -5,12 +5,11 @@ import type {
 	SyncPushTodosOutput,
 	SyncPushTodosInput
 } from '../../routes/api/todos/sync/push/+server';
-import { inject } from '$lib/client/di';
+import { inject, todoRepositoryToken } from '$lib/client/di';
 import { ConnectivityService } from './network-service';
 import * as devalue from 'devalue';
 import { createStorage } from '$lib/client/createStorage';
-import { getDb, recreateDatabase } from '$lib/client/db';
-import { TodoRepository } from '$lib/data/todo.repository';
+import { recreateDatabase } from '$lib/client/db';
 import { UserService } from './user.service';
 
 const syncTodosSchema = z.record(z.string(), pendingTodoSchema).catch(() => ({}));
@@ -19,7 +18,7 @@ export class TodoQueueService {
 	private pendingTodosStorage = createStorage('pending-todos', { schema: syncTodosSchema });
 	private connectivity = inject(ConnectivityService);
 	private userService = inject(UserService);
-	private todoRepository = getDb().then((db) => new TodoRepository(db));
+	private todoRepository = inject(todoRepositoryToken);
 
 	async enqueue(pending: PendingTodo): Promise<void> {
 		const pendingTodos = this.pendingTodosStorage.getItem() || {};

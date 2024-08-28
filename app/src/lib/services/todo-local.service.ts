@@ -1,4 +1,3 @@
-import { getDb } from '$lib/client/db';
 import { ApplicationError } from '$lib/common/error';
 import {
 	createTodoSchema,
@@ -7,14 +6,13 @@ import {
 	type Todo,
 	type UpdateTodo
 } from '$lib/common/schema';
-import { TodoRepository } from '$lib/data/todo.repository';
-import { inject } from '$lib/client/di';
+import { inject, todoRepositoryToken } from '$lib/client/di';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import { UserService } from './user.service';
 
 export class LocalTodoService extends TodoServiceInterface {
 	private userService = inject(UserService);
-	private todoRepository = getDb().then((db) => new TodoRepository(db));
+	private todoRepository = inject(todoRepositoryToken);
 
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
 		const user = await this.userService.getCurrentUser();
