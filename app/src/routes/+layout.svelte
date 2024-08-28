@@ -51,6 +51,18 @@
 		run().catch(console.error);
 	});
 
+	$effect.pre(() => {
+		async function run() {
+			const user = await userService.getCurrentUser();
+
+			if (!user) {
+				await goto('/login');
+			}
+		}
+
+		run();
+	});
+
 	beforeNavigate(async ({ cancel, to }) => {
 		if (!to || isRedirecting) {
 			return;
