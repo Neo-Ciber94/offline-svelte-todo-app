@@ -10,6 +10,7 @@
 	import ConnectivityIndicator from './ConnectivityIndicator.svelte';
 	import Synchronize from './Synchronize.svelte';
 	import { dev } from '$app/environment';
+	import { page } from '$app/stores';
 
 	type Props = {
 		children: Snippet;
@@ -54,8 +55,8 @@
 	$effect.pre(() => {
 		async function run() {
 			const user = await userService.getCurrentUser();
-
-			if (!user) {
+			const pathname = $page.url.pathname;
+			if (!user && !PUBLIC_ROUTES.some((p) => pathname.startsWith(p))) {
 				await goto('/login');
 			}
 		}
