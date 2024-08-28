@@ -1,35 +1,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 
-interface AbstractType<T> extends Function {
-	prototype: T;
-}
-
-interface DefaultType<T> extends Function {
+interface Type<T> extends Function {
 	new (): T;
 }
 
-type Type<T> = DefaultType<T> | AbstractType<T>;
-
-type DependencyProvider<T> = () => T;
-
-type RegisterOptions<T> = {
-	as: Type<T>;
-};
+interface Provider<T> {
+	get(): T;
+}
 
 export class DependencyContainer {
-	#deps = new Map<unknown, DependencyProvider<unknown>>();
+	#deps = new Map<unknown, Provider<unknown>>();
 
-	register<T, U extends T>(type: Type<T>, options?: RegisterOptions<U>) {
-		const f = options?.as ?? type;
-
-		if (f.constructor === null) {
-			throw new Error(`Type '${f.name}' cannot be instantiated`);
+	register<T>(type: Type<T>) {
+		if (type.constructor === null) {
+			throw new Error(`Type '${type.name}' cannot be instantiated`);
 		}
 
-		this.#deps.set(type, () => {
-			// @ts-expect-error We already check the type can be instantiated
-			return new f();
-		});
+		this.#deps.set(
+			type,
+			singleton(() => new type())
+		);
 	}
 
 	inject<T>(type: Type<T>) {
@@ -39,7 +29,20 @@ export class DependencyContainer {
 			throw new Error(`Unable to resolve dependency: '${type.name}'`);
 		}
 
-		return provider() as T;
+		return provider.get() as T;
 	}
 }
 
+function singleton<T>(f: () => T): Provider<T> {
+	let value: T | undefined;
+
+	return {
+		get() {
+			if (!value) {
+				value = f();
+			}
+
+			return value;
+		}
+	};
+}
