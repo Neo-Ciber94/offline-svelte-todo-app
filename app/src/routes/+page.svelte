@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { queryKeys } from '$lib/client/query-keys';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { UserService } from '$lib/services/user.service';
 	import { createQuery } from '@tanstack/svelte-query';
 	import Loading from '$lib/components/Loading.svelte';

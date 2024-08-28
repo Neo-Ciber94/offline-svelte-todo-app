@@ -5,7 +5,7 @@ import type {
 	SyncPushTodosOutput,
 	SyncPushTodosInput
 } from '../../routes/api/todos/sync/push/+server';
-import { inject } from './di';
+import { inject } from '$lib/client/di';
 import { ConnectivityService } from './network-service';
 import * as devalue from 'devalue';
 import { createStorage } from '$lib/client/createStorage';

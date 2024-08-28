@@ -20,7 +20,7 @@ export class ClientTodoRepository implements TodoRepository {
 			id: '',
 			userId: '',
 			title: '',
-			description: null,
+			description: undefined,
 			emoji: '',
 			done: false,
 			createdAt: new Date()

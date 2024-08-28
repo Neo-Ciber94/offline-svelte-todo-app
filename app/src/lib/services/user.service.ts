@@ -3,7 +3,7 @@ import { userSchema, type User } from '$lib/common/schema';
 import { ApplicationError } from '$lib/common/error';
 import * as devalue from 'devalue';
 import { createKvStore } from '$lib/client/idb-kv';
-import { inject } from './di';
+import { inject } from '$lib/client/di';
 import { ConnectivityService } from './network-service';
 
 const CURRENT_USER_KEY = 'current-user';

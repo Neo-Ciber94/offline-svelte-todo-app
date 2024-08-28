@@ -8,7 +8,7 @@ import {
 	type UpdateTodo
 } from '$lib/common/schema';
 import { TodoRepository } from '$lib/data/todo.repository';
-import { inject } from './di';
+import { inject } from '$lib/client/di';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import { UserService } from './user.service';
 

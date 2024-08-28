@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { UserService } from '$lib/services/user.service';
 	import { useQueryClient } from '@tanstack/svelte-query';
 

@@ -5,7 +5,7 @@
 	import { storeToRune } from '$lib/runes/storeToRune.svelte';
 	import { ApplicationError } from '$lib/common/error';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { TodoService } from '$lib/services/todo.service';
 	import { createQuery, useQueryClient, type CreateQueryOptions } from '@tanstack/svelte-query';
 	import SelectEmoji from '$lib/components/SelectEmoji.svelte';

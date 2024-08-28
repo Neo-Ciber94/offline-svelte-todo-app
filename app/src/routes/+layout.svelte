@@ -5,7 +5,7 @@
 	import Header from './Header.svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { PUBLIC_ROUTES } from '$lib/common/constants';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { UserService } from '$lib/services/user.service';
 	import ConnectivityIndicator from './ConnectivityIndicator.svelte';
 	import Synchronize from './Synchronize.svelte';

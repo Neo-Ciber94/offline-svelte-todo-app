@@ -3,7 +3,7 @@
 	import type { Todo } from '$lib/common/schema';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { queryKeys } from '$lib/client/query-keys';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { TodoService } from '$lib/services/todo.service';
 	import { page } from '$app/stores';
 	import { fly } from 'svelte/transition';

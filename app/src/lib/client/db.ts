@@ -1,5 +1,5 @@
 import { SqlJsDatabase } from '$lib/db/adapters/sql-js';
-import { inject } from '$lib/services/di';
+import { inject } from '$lib/client/di';
 import { UserService } from '$lib/services/user.service';
 import migrationSql from '../../../migrations/001_initial.sql?raw';
 
@@ -98,11 +98,14 @@ async function checkMigrations(db: SqlJsDatabase) {
 	}
 
 	// Insert the user and ignore if exists
-	await db.run('INSERT OR IGNORE INTO user(id, username, created_at) VALUES (:id, :username, :created_at)', {
-		':id': user.id,
-		':username': user.username,
-		':created_at': user.createdAt.getTime()
-	});
+	await db.run(
+		'INSERT OR IGNORE INTO user(id, username, created_at) VALUES (:id, :username, :created_at)',
+		{
+			':id': user.id,
+			':username': user.username,
+			':created_at': user.createdAt.getTime()
+		}
+	);
 }
 
 async function hashSha1(input: string) {

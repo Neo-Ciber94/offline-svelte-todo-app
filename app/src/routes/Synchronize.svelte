@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { TodoService } from '$lib/services/todo.service';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { queryKeys } from '$lib/client/query-keys';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import { UserService } from '$lib/services/user.service';

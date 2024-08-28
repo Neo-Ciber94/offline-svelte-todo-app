@@ -1,5 +1,5 @@
 import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
-import { inject } from './di';
+import { inject } from '$lib/client/di';
 import { ConnectivityService } from './network-service';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import { LocalTodoService } from './todo-local.service';

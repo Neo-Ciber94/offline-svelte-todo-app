@@ -2,7 +2,7 @@
 	import { queryKeys } from '$lib/client/query-keys';
 	import Loading from '$lib/components/Loading.svelte';
 	import { useIsOnline } from '$lib/runes/use-is-online.svelte';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { UserService } from '$lib/services/user.service';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { fly } from 'svelte/transition';
