@@ -7,8 +7,8 @@ export default defineConfig((config) => {
 	const fallback = isDev ? undefined : '/200.html';
 	const additionalManifestEntries: string[] = fallback ? [fallback] : [];
 
-	additionalManifestEntries.push("/dist/sql-wasm.wasm");
-	
+	additionalManifestEntries.push('/dist/sql-wasm.wasm');
+
 	return {
 		plugins: [
 			sveltekit(),
