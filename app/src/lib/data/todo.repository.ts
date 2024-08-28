@@ -57,7 +57,7 @@ export class TodoRepository {
 		const { sql, params } = queryBuilderToSql(builder);
 		const result = await this.db.all<TodoModel>(sql, params);
 
-		const values = result.map(x => mapToTodo(x));
+		const values = result.map((x) => mapToTodo(x));
 		return values;
 	}
 
@@ -119,18 +119,8 @@ export class TodoRepository {
 		return newTodo;
 	}
 
-	async insertMany(userId: string, inputs: CreateTodo[]) {
-		const newTodos: Todo[] = inputs.map((input) => ({
-			userId,
-			id: input.id ?? crypto.randomUUID(),
-			title: input.title,
-			description: input.description,
-			emoji: input.emoji,
-			createdAt: new Date(),
-			done: false
-		}));
-
-		const placeholders = newTodos
+	async insertMany(inputs: Todo[]) {
+		const placeholders = inputs
 			.map((_, index) => {
 				return `(:id_${index}, :user_id_${index}, :title_${index}, :description_${index}, :emoji_${index}, :done_${index}, :created_at_${index})`;
 			})
@@ -141,7 +131,7 @@ export class TodoRepository {
 			VALUES ${placeholders}
 		`;
 
-		const params = newTodos.reduce(
+		const params = inputs.reduce(
 			(acc, todo, index) => {
 				acc[`:id_${index}`] = todo.id;
 				acc[`:user_id_${index}`] = todo.userId;
@@ -152,13 +142,10 @@ export class TodoRepository {
 				acc[`:created_at_${index}`] = todo.createdAt.getTime();
 				return acc;
 			},
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			{} as Record<string, any>
 		);
 
 		await this.db.run(query, params);
-
-		return newTodos;
 	}
 
 	async update(userId: string, input: UpdateTodo) {
