@@ -119,7 +119,7 @@ export class TodoRepository {
 		return newTodo;
 	}
 
-	async insertMany(inputs: Todo[]) {
+	async setAll(inputs: Todo[]) {
 		const placeholders = inputs
 			.map((_, index) => {
 				return `(:id_${index}, :user_id_${index}, :title_${index}, :description_${index}, :emoji_${index}, :done_${index}, :created_at_${index})`;
@@ -127,7 +127,7 @@ export class TodoRepository {
 			.join(', ');
 
 		const query = `
-			INSERT INTO todo(id, user_id, title, description, emoji, done, created_at) 
+			INSERT OR IGNORE INTO todo(id, user_id, title, description, emoji, done, created_at) 
 			VALUES ${placeholders}
 		`;
 

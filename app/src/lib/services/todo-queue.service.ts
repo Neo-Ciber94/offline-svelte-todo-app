@@ -83,7 +83,7 @@ export class TodoQueueService {
 
 			const todos = devalue.parse(contents) as Todo[];
 			const repo = await this.todoRepository;
-			await repo.insertMany(todos);
+			await repo.setAll(todos);
 		} catch (err) {
 			// ignore
 		}
