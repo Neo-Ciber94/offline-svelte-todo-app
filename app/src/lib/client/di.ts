@@ -25,4 +25,5 @@ container.register(TodoService);
 container.register(TodoQueueService);
 container.registerWith(todoRepositoryDep.token, todoRepositoryDep.provider);
 
+// Global function to inject dependencies
 export const inject = container.inject.bind(container);
