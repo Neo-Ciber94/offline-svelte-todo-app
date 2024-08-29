@@ -1,70 +1,19 @@
-import type { CreateTodo, PendingTodo, Todo, UpdateTodo } from '$lib/common/schema';
-import { DEFAULT_EMOJI } from '$lib/common/emojis';
-import { applyTodosQuery } from '$lib/common/todo.utils';
-import type { GetAllTodos } from '$lib/services/todo-interface.service';
+import type { PendingTodo, Todo } from '$lib/common/schema';
 import { db } from '$lib/server/db';
-import type { TodoRepository } from './todo.repository';
+import { TodoRepository } from '$lib/data/todo.repository';
 
-type TodoModel = {
-	id: string;
-	user_id: string;
-	title: string;
-	description: string | null;
-	emoji: string;
-	done: boolean;
-	created_at: number;
-};
-
-class ServerTodoRepository implements TodoRepository {
-	async getTodos(userId: string, query?: GetAllTodos): Promise<Todo[]> {
-		const todos = await db
-			.all<TodoModel[]>('SELECT * FROM todo WHERE user_id = ?', [userId])
-			.then((result) => result.map(this.mapToTodo));
-		return applyTodosQuery(todos, userId, query);
-	}
-
-	async getTodoById(userId: string, todoId: string): Promise<Todo | null> {
-		const todo = await db.get<TodoModel>(
-			'SELECT * FROM todo WHERE id = :todo_id AND user_id = :user_id',
-			{
-				':todo_id': todoId,
-				':user_id': userId
-			}
-		);
-
-		return todo ? this.mapToTodo(todo) : null;
-	}
-
-	async createTodo(
-		userId: string,
-		input: CreateTodo,
-		opts?: { onConflict?: 'update' }
-	): Promise<Todo> {
-		const newTodo: Todo = {
-			userId,
-			id: input.id ?? crypto.randomUUID(),
-			title: input.title,
-			description: input.description ?? undefined,
-			emoji: input.emoji,
-			createdAt: new Date(),
-			done: false
-		};
-
-		const result = await this.setTodo(newTodo, opts);
-		return result;
-	}
-
+class ServerTodoRepository extends TodoRepository {
 	private async setTodo(newTodo: Todo, opts?: { onConflict?: 'update' }): Promise<Todo> {
 		const { onConflict } = opts || {};
 
 		let query = `
-			INSERT INTO todo(id, user_id, title, description, emoji, done, created_at) 
+			INSERT INTO todo(id, user_id, title, description, emoji, done, created_at)
 			VALUES(:id, :user_id, :title, :description, :emoji, :done, :created_at)
 		`;
 
 		if (onConflict === 'update') {
 			query += `
-				ON CONFLICT(id) DO UPDATE SET 
+				ON CONFLICT(id) DO UPDATE SET
 					user_id = excluded.user_id,
 					title = excluded.title,
 					description = excluded.description,
@@ -85,47 +34,6 @@ class ServerTodoRepository implements TodoRepository {
 		});
 
 		return newTodo;
-	}
-
-	async updateTodo(userId: string, input: UpdateTodo): Promise<Todo | null> {
-		const todoToUpdate = await db.get<TodoModel>(
-			'SELECT * FROM todo WHERE id = ? AND user_id = ?',
-			[input.id, userId]
-		);
-
-		if (!todoToUpdate) {
-			return null;
-		}
-
-		await db.run(
-			`UPDATE todo 
-				SET 
-					title = :title,
-					description = :description,
-					emoji = :emoji,
-					done = :done
-				WHERE id = :id AND user_id = :user_id
-			`,
-			{
-				':id': input.id,
-				':user_id': userId,
-				':title': input.title == null ? todoToUpdate.title : input.title,
-				':description': input.description == null ? todoToUpdate.description : input.description,
-				':done': input.done == null ? Number(todoToUpdate.done) : Number(input.done),
-				':emoji': input.emoji == null ? todoToUpdate.emoji : input.emoji
-			}
-		);
-
-		return this.mapToTodo(todoToUpdate);
-	}
-
-	async deleteTodo(userId: string, todoId: string): Promise<Todo | null> {
-		const deleted = await db.get<TodoModel>(
-			'DELETE FROM todo WHERE id = ? AND user_id = ? RETURNING *',
-			[todoId, userId]
-		);
-
-		return deleted ? this.mapToTodo(deleted) : null;
 	}
 
 	async synchronizeTodos(userId: string, pendingTodos: PendingTodo[]): Promise<number> {
@@ -157,12 +65,12 @@ class ServerTodoRepository implements TodoRepository {
 					}
 					case 'update': {
 						const input = pending.action.input;
-						operations.push(run(() => this.updateTodo(userId, input)));
+						operations.push(run(() => this.update(userId, input)));
 						break;
 					}
 					case 'delete': {
 						const todoId = pending.action.input.id;
-						operations.push(run(() => this.deleteTodo(userId, todoId)));
+						operations.push(run(() => this.delete(userId, todoId)));
 						break;
 					}
 				}
@@ -177,18 +85,6 @@ class ServerTodoRepository implements TodoRepository {
 
 		return pendingTodos.length;
 	}
-
-	private mapToTodo(model: TodoModel): Todo {
-		return {
-			id: model.id,
-			userId: model.user_id,
-			description: model.description ?? undefined,
-			emoji: model.emoji,
-			done: Boolean(model.done),
-			title: model.title,
-			createdAt: new Date(model.created_at)
-		};
-	}
 }
 
-export const todosRepository = new ServerTodoRepository();
+export const todosRepository = new ServerTodoRepository(db);

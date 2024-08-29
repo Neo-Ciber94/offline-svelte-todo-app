@@ -7,7 +7,7 @@ export class NetworkTodoService extends TodoServiceInterface {
 		const { filter, sort } = query || {};
 		const searchParams = new URLSearchParams();
 
-		if (filter?.done) {
+		if (filter?.done != null) {
 			searchParams.set('done', filter.done.toString());
 		}
 

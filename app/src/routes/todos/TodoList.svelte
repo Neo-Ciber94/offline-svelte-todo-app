@@ -11,21 +11,47 @@
 	import { storeToRune } from '$lib/runes/storeToRune.svelte';
 	import { useDebounce } from '$lib/runes/use-debounce.svelte';
 
+	type TodoState = 'completed' | 'pending';
+
 	const todoService = inject(TodoService);
 	const todoId = $derived($page.params.todo_id);
 
 	// States
 	let search = $state('');
+	let todoState = $state<TodoState>();
 	const debouncedSearch = useDebounce(500, () => search);
+
+	const filterByDone = $derived.by(() => {
+		switch (todoState) {
+			case 'completed': {
+				return true;
+			}
+			case 'pending': {
+				return false;
+			}
+			default: {
+				return undefined;
+			}
+		}
+	});
+
+	function handleStateChange(
+		ev: Event & {
+			currentTarget: HTMLSelectElement;
+		}
+	) {
+		todoState = ev.currentTarget.value as TodoState;
+	}
 
 	const todosQuery = createQuery(
 		storeToRune(() => {
 			return {
-				queryKey: queryKeys.todos.all(debouncedSearch.value),
+				queryKey: queryKeys.todos.all(debouncedSearch.value, filterByDone),
 				async queryFn() {
 					return todoService.getAll({
 						filter: {
-							search: debouncedSearch.value
+							search: debouncedSearch.value,
+							done: filterByDone
 						}
 					});
 				}
@@ -70,7 +96,7 @@
 	</a>
 
 	<div class="w-full pr-2 mb-2 flex flex-row gap-2">
-		<div class="relative w-full">
+		<div class="relative w-full basis-3/4">
 			<input
 				bind:value={search}
 				type="search"
@@ -94,22 +120,11 @@
 			>
 		</div>
 
-		<!-- <button
-			onclick={() => (isFilterOpen = true)}
-			class="py-1 px-2 rounded-md text-white bg-green-500 hover:bg-green-600 active:shadow-[inset_0px_0px_5px_rgba(0,0,0,1)] active:bg-green-600 flex flex-row items-center gap-1"
-		>
-			<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"
-				><path
-					fill="none"
-					stroke="currentColor"
-					stroke-linecap="round"
-					stroke-width="2"
-					d="M18.796 4H5.204a1 1 0 0 0-.753 1.659l5.302 6.058a1 1 0 0 1 .247.659v4.874a.5.5 0 0 0 .2.4l3 2.25a.5.5 0 0 0 .8-.4v-7.124a1 1 0 0 1 .247-.659l5.302-6.059c.566-.646.106-1.658-.753-1.658Z"
-				/></svg
-			>
-
-			<span>Filter</span>
-		</button> -->
+		<select class="border px-2 py-2 rounded-md shadow basis-1/4" onchange={handleStateChange}>
+			<option value={undefined}>All</option>
+			<option value="completed">Completed</option>
+			<option value="pending">Pending</option>
+		</select>
 	</div>
 
 	<div class="w-full h-full overflow-y-auto flex flex-col gap-2 pr-2">

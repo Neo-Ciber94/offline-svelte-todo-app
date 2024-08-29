@@ -1,6 +1,6 @@
 export const queryKeys = {
 	todos: {
-		all: (...params: string[]) => ['todos', ...params],
+		all: (...params: unknown[]) => ['todos', ...params],
 		one: (id: string) => ['todos', id]
 	},
 	users: {

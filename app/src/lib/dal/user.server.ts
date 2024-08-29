@@ -1,6 +1,6 @@
 import { ApplicationError } from '$lib/common/error';
 import type { User } from '$lib/common/schema';
-import { db } from '$lib/server/db';
+import { client } from '$lib/server/db';
 import type { UserRepository } from './user.repository';
 
 type UserModel = {
@@ -11,7 +11,7 @@ type UserModel = {
 
 class ServerUserRepository implements UserRepository {
 	async registerUser(username: string): Promise<User> {
-		const alreadyExists = await db
+		const alreadyExists = await client
 			.get<{ count: number }>('SELECT COUNT(*) as count FROM user WHERE username = ?', [username])
 			.then((result) => Boolean(result?.count));
 
@@ -25,7 +25,7 @@ class ServerUserRepository implements UserRepository {
 			username
 		};
 
-		await db.run(
+		await client.run(
 			`INSERT INTO user(id, username, created_at) 
       VALUES (:id, :username, :created_at)`,
 			{
@@ -39,13 +39,13 @@ class ServerUserRepository implements UserRepository {
 	}
 
 	async getUser(userId: string): Promise<User | null> {
-		const user = await db.get<UserModel>('SELECT * FROM user WHERE id = ?', [userId]);
+		const user = await client.get<UserModel>('SELECT * FROM user WHERE id = ?', [userId]);
 
 		return user ? this.mapToUser(user) : null;
 	}
 
 	async getUserByUsername(username: string): Promise<User | null> {
-		const user = await db.get<UserModel>('SELECT * FROM user WHERE username = ?', [username]);
+		const user = await client.get<UserModel>('SELECT * FROM user WHERE username = ?', [username]);
 
 		return user ? this.mapToUser(user) : null;
 	}

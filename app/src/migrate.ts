@@ -1,3 +1,3 @@
-import { db } from '$lib/server/db';
+import { client } from '$lib/server/db';
 
-await db.migrate({});
+await client.migrate({});

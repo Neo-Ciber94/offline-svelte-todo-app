@@ -17,15 +17,15 @@ export async function createTodo(
 		onConflict?: 'update';
 	}
 ) {
-	return todosRepository.createTodo(userId, input, opts);
+	return todosRepository.insert(userId, input, opts);
 }
 
 export async function updateTodo(userId: string, input: UpdateTodo) {
-	return todosRepository.updateTodo(userId, input);
+	return todosRepository.update(userId, input);
 }
 
 export async function deleteTodo(userId: string, todoId: string) {
-	return todosRepository.deleteTodo(userId, todoId);
+	return todosRepository.delete(userId, todoId);
 }
 
 export async function synchronizeTodos(userId: string, pendingTodos: PendingTodo[]) {
