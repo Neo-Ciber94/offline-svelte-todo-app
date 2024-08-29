@@ -14,7 +14,7 @@ import { UserService } from './user.service';
 
 const syncTodosSchema = z.record(z.string(), pendingTodoSchema).catch(() => ({}));
 
-export class TodoQueueService {
+export class TodoSyncService {
 	private pendingTodosStorage = createStorage('pending-todos', { schema: syncTodosSchema });
 	private connectivity = inject(ConnectivityService);
 	private userService = inject(UserService);

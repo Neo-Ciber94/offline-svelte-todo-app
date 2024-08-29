@@ -4,24 +4,24 @@ import { ConnectivityService } from './network-service';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import { LocalTodoService } from './todo-local.service';
 import { NetworkTodoService } from './todo-network.service';
-import { TodoQueueService } from './todo-queue.service';
+import { TodoSyncService } from './todo-sync.service';
 
 export class TodoService extends TodoServiceInterface {
 	private readonly connectivity = inject(ConnectivityService);
 	private readonly localTodos = inject(LocalTodoService);
 	private readonly networkTodos = inject(NetworkTodoService);
-	private readonly todosQueue = inject(TodoQueueService);
+	private readonly todoSync = inject(TodoSyncService);
 
 	async synchronize() {
 		// Push any pending todos to the server
-		const resolvedCount = await this.todosQueue.push();
+		const resolvedCount = await this.todoSync.push();
 
 		if (resolvedCount) {
 			console.log(`✅ pending todos where resolved`);
 		}
 
 		// Pull all the todos from the server and merge with the current
-		await this.todosQueue.pull();
+		await this.todoSync.pull();
 	}
 
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
@@ -47,7 +47,7 @@ export class TodoService extends TodoServiceInterface {
 
 		if (!this.connectivity.isOnline()) {
 			const newTodo = await this.localTodos.insert(input);
-			this.todosQueue
+			this.todoSync
 				.enqueue({ id: newTodo.id, action: { type: 'create', input } })
 				.catch(console.error);
 
@@ -63,7 +63,7 @@ export class TodoService extends TodoServiceInterface {
 
 	async update(input: UpdateTodo): Promise<Todo | null> {
 		if (!this.connectivity.isOnline()) {
-			this.todosQueue
+			this.todoSync
 				.enqueue({ id: input.id, action: { type: 'update', input: input } })
 				.catch(console.error);
 
@@ -79,7 +79,7 @@ export class TodoService extends TodoServiceInterface {
 
 	async delete(todoId: string): Promise<Todo | null> {
 		if (!this.connectivity.isOnline()) {
-			this.todosQueue
+			this.todoSync
 				.enqueue({ id: todoId, action: { type: 'delete', input: { id: todoId } } })
 				.catch(console.error);
 

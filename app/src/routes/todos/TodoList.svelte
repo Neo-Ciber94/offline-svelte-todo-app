@@ -69,14 +69,47 @@
 		Add Todo
 	</a>
 
-	<div class="w-full pr-2 mb-2">
-		<input
-			bind:value={search}
-			type="search"
-			name="search"
-			class="border px-2 py-2 rounded-md shadow w-full"
-			placeholder="Search..."
-		/>
+	<div class="w-full pr-2 mb-2 flex flex-row gap-2">
+		<div class="relative w-full">
+			<input
+				bind:value={search}
+				type="search"
+				name="search"
+				class="border px-2 py-2 rounded-md shadow w-full pl-10"
+				placeholder="Search..."
+			/>
+
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="absolute left-2 top-1/2 size-6 text-gray-400 -translate-y-1/2"
+				viewBox="0 0 24 24"
+				><path
+					fill="none"
+					stroke="currentColor"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0-14 0m18 11l-6-6"
+				/></svg
+			>
+		</div>
+
+		<!-- <button
+			onclick={() => (isFilterOpen = true)}
+			class="py-1 px-2 rounded-md text-white bg-green-500 hover:bg-green-600 active:shadow-[inset_0px_0px_5px_rgba(0,0,0,1)] active:bg-green-600 flex flex-row items-center gap-1"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24"
+				><path
+					fill="none"
+					stroke="currentColor"
+					stroke-linecap="round"
+					stroke-width="2"
+					d="M18.796 4H5.204a1 1 0 0 0-.753 1.659l5.302 6.058a1 1 0 0 1 .247.659v4.874a.5.5 0 0 0 .2.4l3 2.25a.5.5 0 0 0 .8-.4v-7.124a1 1 0 0 1 .247-.659l5.302-6.059c.566-.646.106-1.658-.753-1.658Z"
+				/></svg
+			>
+
+			<span>Filter</span>
+		</button> -->
 	</div>
 
 	<div class="w-full h-full overflow-y-auto flex flex-col gap-2 pr-2">
