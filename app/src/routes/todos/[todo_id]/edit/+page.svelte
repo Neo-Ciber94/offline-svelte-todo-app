@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { queryKeys } from '$lib/client/query-keys';
-	import { storeToRune } from '$lib/runes/storeToRune.svelte';
+	import { runeToStore } from '$lib/runes/runeToStore.svelte';
 	import { ApplicationError } from '$lib/common/error';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
 	import { inject } from '$lib/client/di';
@@ -15,7 +15,7 @@
 	const todoId = $derived($page.params.todo_id);
 
 	const todoQuery = createQuery(
-		storeToRune(() => {
+		runeToStore(() => {
 			return {
 				queryKey: queryKeys.todos.one(todoId),
 				queryFn: () => todoService.getById(todoId)

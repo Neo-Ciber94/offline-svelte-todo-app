@@ -8,7 +8,7 @@
 	import { page } from '$app/stores';
 	import { fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import { storeToRune } from '$lib/runes/storeToRune.svelte';
+	import { runeToStore } from '$lib/runes/runeToStore.svelte';
 	import { useDebounce } from '$lib/runes/use-debounce.svelte';
 
 	type TodoState = 'completed' | 'pending';
@@ -45,7 +45,7 @@
 	}
 
 	const todosQuery = createQuery(
-		storeToRune(() => {
+		runeToStore(() => {
 			return {
 				queryKey: queryKeys.todos.all(
 					debouncedFilter.value.filterByDone,
