@@ -19,7 +19,6 @@
 	// States
 	let search = $state('');
 	let todoState = $state<TodoState>();
-	const debouncedSearch = useDebounce(500, () => search);
 
 	const filterByDone = $derived.by(() => {
 		switch (todoState) {
@@ -35,6 +34,8 @@
 		}
 	});
 
+	const debouncedFilter = useDebounce(500, () => ({ search, filterByDone }));
+
 	function handleStateChange(
 		ev: Event & {
 			currentTarget: HTMLSelectElement;
@@ -46,12 +47,15 @@
 	const todosQuery = createQuery(
 		storeToRune(() => {
 			return {
-				queryKey: queryKeys.todos.all(debouncedSearch.value, filterByDone),
+				queryKey: queryKeys.todos.all(
+					debouncedFilter.value.filterByDone,
+					debouncedFilter.value.search
+				),
 				async queryFn() {
 					return todoService.getAll({
 						filter: {
-							search: debouncedSearch.value,
-							done: filterByDone
+							search: debouncedFilter.value.search,
+							done: debouncedFilter.value.filterByDone
 						}
 					});
 				}
