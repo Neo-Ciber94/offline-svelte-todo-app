@@ -6,10 +6,11 @@ import { createTodoSchema } from '$lib/common/schema';
 import { createTodo, getTodos } from '$lib/server/data/todo';
 
 const getAllSchema = z.object({
-	done: z.coerce
-		.boolean()
+	done: z
+		.string()
 		.optional()
-		.catch(() => undefined),
+		.catch(() => undefined)
+		.transform((x) => (x == null ? undefined : x === 'true')),
 	search: z
 		.string()
 		.optional()

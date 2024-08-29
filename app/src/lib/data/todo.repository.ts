@@ -39,7 +39,7 @@ export class TodoRepository {
 
 			if (query.filter?.search) {
 				builder.where.push({
-					sql: 'LOWER(todo.title) LIKE %:search%',
+					sql: "LOWER(todo.title) LIKE LOWER('%' || :search || '%')",
 					params: {
 						':search': query.filter.search.toLowerCase()
 					}
