@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { queryKeys } from '$lib/client/query-keys';
-	import { runeToStore } from '$lib/runes/runeToStore.svelte';
+	import { runeToStore } from '$lib/runes/runes.svelte';
 	import { ApplicationError } from '$lib/common/error';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
 	import { inject } from '$lib/client/di';

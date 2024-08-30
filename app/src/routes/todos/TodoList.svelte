@@ -8,7 +8,7 @@
 	import { page } from '$app/stores';
 	import { fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import { runeToStore } from '$lib/runes/runeToStore.svelte';
+	import { runeToStore } from '$lib/runes/runes.svelte';
 	import { useDebounce } from '$lib/runes/use-debounce.svelte';
 
 	type TodoState = 'completed' | 'pending';
