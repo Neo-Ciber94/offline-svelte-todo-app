@@ -10,18 +10,33 @@
 	import { quintOut } from 'svelte/easing';
 	import { runeToStore } from '$lib/runes/runes.svelte';
 	import { useDebounce } from '$lib/runes/use-debounce.svelte';
+	import { z } from 'zod';
+	import { useQueryParams } from '$lib/runes/use-query-params.svelte';
 
 	type TodoState = 'completed' | 'pending';
 
+	const todoFilterSchema = z.object({
+		search: z
+			.string()
+			.default('')
+			.catch(() => ''),
+		state: z
+			.enum(['completed', 'pending'])
+			.optional()
+			.catch(() => undefined)
+	});
+
 	const todoService = inject(TodoService);
 	const todoId = $derived($page.params.todo_id);
+	const filterQuery = useQueryParams(todoFilterSchema, {
+		defaultValue: { search: '', state: undefined }
+	});
 
-	// States
-	let search = $state('');
-	let todoState = $state<TodoState>();
+	const debouncedSearch = useDebounce(500, () => filterQuery.value.search);
+	const debouncedState = useDebounce(500, () => filterQuery.value.state);
 
-	const filterByDone = $derived.by(() => {
-		switch (todoState) {
+	function isTodoDone(s: TodoState | undefined) {
+		switch (s) {
 			case 'completed': {
 				return true;
 			}
@@ -32,30 +47,25 @@
 				return undefined;
 			}
 		}
-	});
+	}
 
-	const debouncedFilter = useDebounce(500, () => ({ search, filterByDone }));
-
-	function handleStateChange(
-		ev: Event & {
-			currentTarget: HTMLSelectElement;
-		}
-	) {
-		todoState = ev.currentTarget.value as TodoState;
+	function handleStateChange(ev: Event & { currentTarget: HTMLSelectElement }) {
+		const newTodoState = ev.currentTarget.value as TodoState;
+		filterQuery.update((s) => ({ ...s, state: newTodoState }));
 	}
 
 	const todosQuery = createQuery(
 		runeToStore(() => {
+			const search = debouncedSearch.current;
+			const done = isTodoDone(debouncedState.current);
+
 			return {
-				queryKey: queryKeys.todos.all(
-					debouncedFilter.value.filterByDone,
-					debouncedFilter.value.search
-				),
+				queryKey: queryKeys.todos.all(done, search),
 				async queryFn() {
 					return todoService.getAll({
 						filter: {
-							search: debouncedFilter.value.search,
-							done: debouncedFilter.value.filterByDone
+							search,
+							done
 						}
 					});
 				}
@@ -102,11 +112,14 @@
 	<div class="w-full pr-2 mb-2 flex flex-row gap-2">
 		<div class="relative w-full basis-3/4">
 			<input
-				bind:value={search}
 				type="search"
 				name="search"
 				class="border px-2 py-2 rounded-md shadow w-full pl-10"
 				placeholder="Search..."
+				bind:value={filterQuery.value.search}
+				onchange={(ev) => {
+					filterQuery.update((prev) => ({ ...prev, search: ev.currentTarget.value }));
+				}}
 			/>
 
 			<svg
@@ -124,7 +137,11 @@
 			>
 		</div>
 
-		<select class="border px-2 py-2 rounded-md shadow basis-1/4" onchange={handleStateChange}>
+		<select
+			class="border px-2 py-2 rounded-md shadow basis-1/4"
+			value={filterQuery.value.state}
+			onchange={handleStateChange}
+		>
 			<option value={undefined}>All</option>
 			<option value="completed">Completed</option>
 			<option value="pending">Pending</option>

@@ -1,21 +1,23 @@
 export function useDebounce<T>(ms: number, f: () => T) {
-	let currentValue = $state(f());
+	let value = $state(f());
 
 	$effect(() => {
 		const newValue = f();
 
 		const timeoutId = window.setTimeout(() => {
-			currentValue = newValue;
+			value = newValue;
+			console.log("Set value")
 		}, ms);
 
 		return () => {
+			console.log("Clean")
 			clearTimeout(timeoutId);
 		};
 	});
 
 	return {
-		get value() {
-			return currentValue;
+		get current() {
+			return value;
 		}
 	};
 }
