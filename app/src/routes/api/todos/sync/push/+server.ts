@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { RequestHandler } from '../$types';
+import type { RequestHandler } from './$types';
 import { pendingTodoSchema } from '$lib/common/schema';
 import { error } from '@sveltejs/kit';
 import * as devalue from 'devalue';

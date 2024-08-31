@@ -5,8 +5,6 @@
 
 	const sidebar = useSidebar();
 	const isTodosPage = $derived($page.url.pathname.startsWith('/todos'));
-
-	const key = '!23';
 </script>
 
 <header

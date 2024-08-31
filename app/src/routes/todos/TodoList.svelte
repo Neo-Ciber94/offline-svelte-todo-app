@@ -13,12 +13,14 @@
 	import { z } from 'zod';
 	import { useQueryParams } from '$lib/runes/use-query-params.svelte';
 	import { getAllSchema } from '$lib/services/todo-interface.service';
+	import type { LayoutData } from './$types';
+	import { invalidateAll } from '$app/navigation';
 
 	type TodoState = z.infer<typeof todoFilterSchema>['state'];
 
 	const todoFilterSchema = getAllSchema.pick({ search: true, state: true });
 
-	const todoService = inject(TodoService);
+	// const todoService = inject(TodoService);
 	const todoId = $derived($page.params.todo_id);
 	const filterQuery = useQueryParams(todoFilterSchema, {
 		defaultValue: { search: '', state: undefined }
@@ -32,22 +34,20 @@
 		filterQuery.update((s) => ({ ...s, state: newTodoState }));
 	}
 
-	const todosQuery = createQuery(
-		runeToStore(() => {
-			const search = debouncedSearch.current;
-			const state = debouncedState.current;
+	const pageData = $derived($page.data as LayoutData);
+	const todosPromise = $derived(pageData.todosPromise);
 
-			return {
-				queryKey: queryKeys.todos.all(search, state),
-				async queryFn() {
-					return todoService.getAll({
-						search,
-						state
-					});
-				}
-			} satisfies CreateQueryOptions;
-		})
-	);
+	$effect(() => {
+		const _1 = debouncedSearch.current;
+		const _2 = debouncedState.current;
+
+		async function run() {
+			console.log({ _1, _2 });
+			await invalidateAll();
+		}
+
+		run();
+	});
 </script>
 
 {#snippet TodoItem(todo: Todo, delay: number)}
@@ -125,7 +125,7 @@
 	</div>
 
 	<div class="w-full h-full overflow-y-auto flex flex-col gap-2 pr-2">
-		{#if $todosQuery.isLoading}
+		<!-- {#if $todosQuery.isLoading}
 			<div class="w-full flex flex-row justify-center">
 				<Loading class="size-6 text-green-300" />
 			</div>
@@ -135,6 +135,18 @@
 			{:else}
 				<h3 class="w-full text-center font-bold text-lg text-green-200 my-2">No todos</h3>
 			{/each}
-		{/if}
+		{/if} -->
+
+		{#await todosPromise}
+			<div class="w-full flex flex-row justify-center">
+				<Loading class="size-6 text-green-300" />
+			</div>
+		{:then todos}
+			{#each todos as todo, index (todo.id)}
+				{@render TodoItem(todo, index * 50)}
+			{:else}
+				<h3 class="w-full text-center font-bold text-lg text-green-200 my-2">No todos</h3>
+			{/each}
+		{/await}
 	</div>
 </div>

@@ -1,46 +1,24 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { queryKeys } from '$lib/client/query-keys';
-	import { runeToStore } from '$lib/runes/runes.svelte';
 	import { ApplicationError } from '$lib/common/error';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
 	import { inject } from '$lib/client/di';
 	import { TodoService } from '$lib/services/todo.service';
-	import { createQuery, useQueryClient, type CreateQueryOptions } from '@tanstack/svelte-query';
 	import SelectEmoji from '$lib/components/SelectEmoji.svelte';
+	import type { PageData } from './$types';
 
+	const { data }: { data: PageData } = $props();
 	const todoService = inject(TodoService);
-	const queryClient = useQueryClient();
-	const todoId = $derived($page.params.todo_id);
+	const todoId = $derived(data.todo.id);
 
-	const todoQuery = createQuery(
-		runeToStore(() => {
-			return {
-				queryKey: queryKeys.todos.one(todoId),
-				queryFn: () => todoService.getById(todoId)
-			} satisfies CreateQueryOptions;
-		})
-	);
-
-	let title = $state('');
-	let description = $state<string>();
-	let isDone = $state(false);
-	let emoji = $state('');
+	let title = $state(data.todo.title);
+	let description = $state(data.todo.description);
+	let isDone = $state(data.todo.done);
+	let emoji = $state(data.todo.emoji);
 
 	// ui state
 	let isMutating = $state(false);
 	let error = $state<string>();
-
-	$effect(() => {
-		const data = $todoQuery.data;
-		if (data) {
-			title = data.title;
-			description = data.description ?? undefined;
-			emoji = data.emoji;
-			isDone = data.done;
-		}
-	});
 
 	async function handleEdit(ev: SubmitEvent) {
 		ev.preventDefault();
@@ -56,8 +34,7 @@
 				done: isDone
 			});
 
-			queryClient.invalidateQueries();
-			await goto(`/todos/${todoId}`);
+			await goto(`/todos/${todoId}`, { invalidateAll: true });
 		} catch (err) {
 			error = err instanceof ApplicationError ? err.message : 'Failed to update todo';
 		} finally {

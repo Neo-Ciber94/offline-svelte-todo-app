@@ -1,42 +1,32 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { queryKeys } from '$lib/client/query-keys';
-	import { runeToStore } from '$lib/runes/runes.svelte';
 	import Loading from '$lib/components/Loading.svelte';
 	import { inject } from '$lib/client/di';
 	import { TodoService } from '$lib/services/todo.service';
-	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import { scale } from 'svelte/transition';
 	import * as easing from 'svelte/easing';
+	import type { PageData } from './$types';
+	import { invalidateAll } from '$app/navigation';
 
-	const todoId = $derived($page.params.todo_id);
+	const { data }: { data: PageData } = $props();
+	const todo = $derived(data.todo);
+
 	const todoService = inject(TodoService);
-	const queryClient = useQueryClient();
+	const todoId = $derived($page.params.todo_id);
 	let isMutating = $state(false);
 
-	const todoQuery = createQuery(
-		runeToStore(() => ({
-			queryKey: queryKeys.todos.one(todoId),
-			async queryFn() {
-				return todoService.getById(todoId);
-			}
-		}))
-	);
-
-	async function handleCompleteTodo() {
+	async function completeTodo() {
 		await todoService.update({
 			id: todoId,
 			done: true
 		});
 
-		queryClient.invalidateQueries();
+		await invalidateAll();
 	}
 
 	async function deleteTodo() {
-		const data = $todoQuery.data!;
-
-		if (!confirm(`Delete "${data.title}"?`)) {
+		if (!confirm(`Delete "${todo.title}"?`)) {
 			return;
 		}
 
@@ -44,8 +34,7 @@
 
 		try {
 			await todoService.delete(todoId);
-			queryClient.invalidateQueries();
-			await goto('/todos');
+			await goto('/todos', { invalidateAll: true });
 		} finally {
 			isMutating = false;
 		}
@@ -66,11 +55,9 @@
 {/snippet}
 
 <div class="w-full h-full flex flex-row justify-center items-center">
-	{#if $todoQuery.isLoading}
+	{#if todo == null}
 		<Loading class="size-10" />
-	{:else if $todoQuery.data}
-		{@const todo = $todoQuery.data}
-
+	{:else}
 		{#key todoId}
 			<div
 				in:scale={{ duration: 1000, opacity: 0, start: 0.7, easing: easing.quintOut }}
@@ -115,7 +102,7 @@
 				{#if !todo.done}
 					<button
 						disabled={isMutating}
-						onclick={handleCompleteTodo}
+						onclick={completeTodo}
 						class="p-2 bg-neutral-800 hover:bg-neutral-950 text-white rounded-xl shadow text-center mx-2 mb-2 disabled:opacity-70 disabled:cursor-not-allowed"
 					>
 						<span> Mark as Complete</span>
