@@ -3,22 +3,22 @@ import { userSchema, type User } from '$lib/common/schema';
 import { ApplicationError } from '$lib/common/error';
 import * as devalue from 'devalue';
 import { createKvStore } from '$lib/client/idb-kv';
-import { inject } from './di';
-import { NetworkService } from './network-service';
+import { inject } from '$lib/client/di';
+import { ConnectivityService } from './network-service';
 
 const CURRENT_USER_KEY = 'current-user';
 const { set, del, get } = createKvStore();
 
 export class UserService {
-	private networkService = inject(NetworkService);
-	#user: User | null | undefined = undefined;
+	private connectivity = inject(ConnectivityService);
+	private user: User | null | undefined = undefined;
 
 	async getCurrentUser(): Promise<User | null> {
-		if (this.#user !== undefined) {
-			return this.#user;
+		if (this.user !== undefined) {
+			return this.user;
 		}
 
-		if (!this.networkService.isOnline()) {
+		if (!this.connectivity.isOnline()) {
 			const raw = await get(CURRENT_USER_KEY);
 			const result = userSchema.safeParse(raw);
 
@@ -39,8 +39,8 @@ export class UserService {
 		const result = userSchema.safeParse(devalue.parse(contents));
 
 		if (result.success) {
-			this.#user = result.data;
-			return this.#user;
+			this.user = result.data;
+			return this.user;
 		}
 
 		await del(CURRENT_USER_KEY);
@@ -48,7 +48,7 @@ export class UserService {
 	}
 
 	async register(username: string): Promise<Result<User, string>> {
-		if (!this.networkService.isOnline()) {
+		if (!this.connectivity.isOnline()) {
 			throw new ApplicationError(400, 'Unable to register while offline');
 		}
 
@@ -70,7 +70,7 @@ export class UserService {
 
 			const user = userSchema.parse(devalue.parse(contents));
 			{
-				this.#user = user;
+				this.user = user;
 				await set(CURRENT_USER_KEY, user);
 			}
 
@@ -82,7 +82,7 @@ export class UserService {
 	}
 
 	async login(username: string): Promise<Result<User, string>> {
-		if (!this.networkService.isOnline()) {
+		if (!this.connectivity.isOnline()) {
 			throw new ApplicationError(400, 'Unable to login while offline');
 		}
 
@@ -103,7 +103,7 @@ export class UserService {
 
 			const user = userSchema.parse(devalue.parse(contents));
 			{
-				this.#user = user;
+				this.user = user;
 				await set(CURRENT_USER_KEY, user);
 			}
 
@@ -115,12 +115,12 @@ export class UserService {
 	}
 
 	async logout(): Promise<void> {
-		if (!this.networkService.isOnline()) {
+		if (!this.connectivity.isOnline()) {
 			throw new ApplicationError(400, 'Unable to logout while offline');
 		}
 
 		await del(CURRENT_USER_KEY);
-		this.#user = null;
+		this.user = null;
 		location.href = `${location.origin}/api/users/logout`;
 	}
 }

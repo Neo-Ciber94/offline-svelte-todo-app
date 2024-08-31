@@ -4,7 +4,7 @@
 
 @layer base {
 	:root {
-		--header-height: theme('height.16')
+		--header-height: theme('height.16');
 	}
 }
 

@@ -2,9 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { queryKeys } from '$lib/client/query-keys';
-	import { storeToRune } from '$lib/runes/storeToRune.svelte';
+	import { runeToStore } from '$lib/runes/runes.svelte';
 	import Loading from '$lib/components/Loading.svelte';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { TodoService } from '$lib/services/todo.service';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import { scale } from 'svelte/transition';
@@ -16,7 +16,7 @@
 	let isMutating = $state(false);
 
 	const todoQuery = createQuery(
-		storeToRune(() => ({
+		runeToStore(() => ({
 			queryKey: queryKeys.todos.one(todoId),
 			async queryFn() {
 				return todoService.getById(todoId);

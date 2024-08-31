@@ -2,30 +2,25 @@ import type { CreateTodo, Todo, UpdateTodo } from '$lib/common/schema';
 import { TodoServiceInterface, type GetAllTodos } from './todo-interface.service';
 import * as devalue from 'devalue';
 
-
 export class NetworkTodoService extends TodoServiceInterface {
-	synchronize(): Promise<void> {
-		return Promise.resolve();
-	}
-
 	async getAll(query?: GetAllTodos): Promise<Todo[]> {
-		const { filter, sort } = query || {};
+		const { search, sortBy, sortDir, state } = query || {};
 		const searchParams = new URLSearchParams();
 
-		if (filter?.done) {
-			searchParams.set('done', filter.done.toString());
+		if (state != null) {
+			searchParams.set('state', state.toString());
 		}
 
-		if (filter?.search) {
-			searchParams.set('search', filter.search);
+		if (search) {
+			searchParams.set('search', search);
 		}
 
-		if (sort?.by) {
-			searchParams.set('sortBy', sort.by);
+		if (sortBy) {
+			searchParams.set('sortBy', sortBy);
 		}
 
-		if (sort?.dir) {
-			searchParams.set('sortDir', sort.dir);
+		if (sortDir) {
+			searchParams.set('sortDir', sortDir);
 		}
 
 		const res = await fetch(`/api/todos?${searchParams.toString()}`);

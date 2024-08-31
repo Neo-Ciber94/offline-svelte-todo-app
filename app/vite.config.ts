@@ -5,6 +5,9 @@ import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 export default defineConfig((config) => {
 	const isDev = config.mode === 'development';
 	const fallback = isDev ? undefined : '/200.html';
+	const additionalManifestEntries: string[] = fallback ? [fallback] : [];
+
+	additionalManifestEntries.push('/dist/sql-wasm.wasm');
 
 	return {
 		plugins: [
@@ -13,7 +16,7 @@ export default defineConfig((config) => {
 				registerType: 'autoUpdate',
 				workbox: {
 					navigateFallback: fallback,
-					additionalManifestEntries: fallback ? [fallback] : [],
+					additionalManifestEntries,
 					cleanupOutdatedCaches: true,
 					clientsClaim: true,
 					skipWaiting: true

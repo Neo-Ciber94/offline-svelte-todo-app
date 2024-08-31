@@ -5,11 +5,12 @@
 	import Header from './Header.svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { PUBLIC_ROUTES } from '$lib/common/constants';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { UserService } from '$lib/services/user.service';
 	import ConnectivityIndicator from './ConnectivityIndicator.svelte';
 	import Synchronize from './Synchronize.svelte';
 	import { dev } from '$app/environment';
+	import { page } from '$app/stores';
 
 	type Props = {
 		children: Snippet;
@@ -49,6 +50,18 @@
 		};
 
 		run().catch(console.error);
+	});
+
+	$effect.pre(() => {
+		async function run() {
+			const user = await userService.getCurrentUser();
+			const pathname = $page.url.pathname;
+			if (!user && !PUBLIC_ROUTES.some((p) => pathname.startsWith(p))) {
+				await goto('/login');
+			}
+		}
+
+		run();
 	});
 
 	beforeNavigate(async ({ cancel, to }) => {

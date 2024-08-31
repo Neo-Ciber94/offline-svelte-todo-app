@@ -4,7 +4,7 @@ export const todoSchema = z.object({
 	id: z.string(),
 	userId: z.string(),
 	title: z.string(),
-	description: z.string().nullable(),
+	description: z.string().optional(),
 	emoji: z.string().emoji(),
 	done: z.boolean().default(false),
 	createdAt: z.date().default(() => new Date())
@@ -48,7 +48,12 @@ export const pendingTodoSchema = z.object({
 	action: z.discriminatedUnion('type', [
 		z.object({
 			type: z.literal('create'),
-			input: createTodoSchema
+			input: createTodoSchema.merge(
+				z.object({
+					done: z.boolean().optional(),
+					createdAt: z.date().optional()
+				})
+			)
 		}),
 		z.object({
 			type: z.literal('update'),

@@ -4,7 +4,7 @@
 	import { ApplicationError } from '$lib/common/error';
 	import ErrorAlert from '$lib/components/ErrorAlert.svelte';
 	import SelectEmoji from '$lib/components/SelectEmoji.svelte';
-	import { inject } from '$lib/services/di';
+	import { inject } from '$lib/client/di';
 	import { TodoService } from '$lib/services/todo.service';
 	import { useQueryClient } from '@tanstack/svelte-query';
 
