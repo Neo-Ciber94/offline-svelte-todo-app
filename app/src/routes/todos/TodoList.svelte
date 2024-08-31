@@ -12,19 +12,11 @@
 	import { useDebounce } from '$lib/runes/use-debounce.svelte';
 	import { z } from 'zod';
 	import { useQueryParams } from '$lib/runes/use-query-params.svelte';
+	import { getAllSchema } from '$lib/services/todo-interface.service';
 
-	type TodoState = 'completed' | 'pending';
+	type TodoState = z.infer<typeof todoFilterSchema>['state'];
 
-	const todoFilterSchema = z.object({
-		search: z
-			.string()
-			.default('')
-			.catch(() => ''),
-		state: z
-			.enum(['completed', 'pending'])
-			.optional()
-			.catch(() => undefined)
-	});
+	const todoFilterSchema = getAllSchema.pick({ search: true, state: true });
 
 	const todoService = inject(TodoService);
 	const todoId = $derived($page.params.todo_id);
@@ -35,20 +27,6 @@
 	const debouncedSearch = useDebounce(500, () => filterQuery.value.search);
 	const debouncedState = useDebounce(500, () => filterQuery.value.state);
 
-	function isTodoDone(s: TodoState | undefined) {
-		switch (s) {
-			case 'completed': {
-				return true;
-			}
-			case 'pending': {
-				return false;
-			}
-			default: {
-				return undefined;
-			}
-		}
-	}
-
 	function handleStateChange(ev: Event & { currentTarget: HTMLSelectElement }) {
 		const newTodoState = ev.currentTarget.value as TodoState;
 		filterQuery.update((s) => ({ ...s, state: newTodoState }));
@@ -57,16 +35,14 @@
 	const todosQuery = createQuery(
 		runeToStore(() => {
 			const search = debouncedSearch.current;
-			const done = isTodoDone(debouncedState.current);
+			const state = debouncedState.current;
 
 			return {
-				queryKey: queryKeys.todos.all(done, search),
+				queryKey: queryKeys.todos.all(search, state),
 				async queryFn() {
 					return todoService.getAll({
-						filter: {
-							search,
-							done
-						}
+						search,
+						state
 					});
 				}
 			} satisfies CreateQueryOptions;

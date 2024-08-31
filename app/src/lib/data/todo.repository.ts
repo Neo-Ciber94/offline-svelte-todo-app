@@ -28,30 +28,31 @@ export class TodoRepository {
 
 		// Filter
 		if (query) {
-			if (query.filter?.done != null) {
+			if (query.state != null) {
+				const isDone = query.state === 'completed';
 				builder.where.push({
 					sql: 'todo.done = :done',
 					params: {
-						':done': Number(query.filter.done)
+						':done': Number(isDone)
 					}
 				});
 			}
 
-			if (query.filter?.search) {
+			if (query?.search) {
 				builder.where.push({
 					sql: "LOWER(todo.title) LIKE LOWER('%' || :search || '%')",
 					params: {
-						':search': query.filter.search.toLowerCase()
+						':search': query.search.toLowerCase()
 					}
 				});
 			}
 		}
 
 		// Ordering
-		const { by = 'created_at', dir = 'asc' } = query?.sort || {};
+		const { sortBy = 'created_at', sortDir = 'asc' } = query || {};
 		builder.sort = {
-			column: by,
-			dir
+			column: sortBy,
+			dir: sortDir
 		};
 
 		const { sql, params } = queryBuilderToSql(builder);

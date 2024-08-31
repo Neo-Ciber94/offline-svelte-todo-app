@@ -1,29 +1,9 @@
 import { toJson } from '$lib/server/helpers';
 import { error, isHttpError, type RequestHandler } from '@sveltejs/kit';
-import { z } from 'zod';
 import * as devalue from 'devalue';
 import { createTodoSchema } from '$lib/common/schema';
 import { createTodo, getTodos } from '$lib/server/data/todo';
-
-const getAllSchema = z.object({
-	done: z
-		.string()
-		.optional()
-		.catch(() => undefined)
-		.transform((x) => (x == null ? undefined : x === 'true')),
-	search: z
-		.string()
-		.optional()
-		.catch(() => undefined),
-	sortBy: z
-		.enum(['created_at', 'title'])
-		.optional()
-		.catch(() => undefined),
-	sortDir: z
-		.enum(['asc', 'desc'])
-		.optional()
-		.catch(() => undefined)
-});
+import { getAllSchema } from '$lib/services/todo-interface.service';
 
 export const GET: RequestHandler = async (event) => {
 	const user = event.locals.user;
@@ -34,18 +14,7 @@ export const GET: RequestHandler = async (event) => {
 
 	const sp = Object.fromEntries(event.url.searchParams);
 	const query = getAllSchema.parse(sp);
-
-	const result = await getTodos(user.id, {
-		filter: {
-			done: query.done,
-			search: query.search
-		},
-		sort: {
-			by: query.sortBy,
-			dir: query.sortDir
-		}
-	});
-
+	const result = await getTodos(user.id, query);
 	return toJson(result);
 };
 
