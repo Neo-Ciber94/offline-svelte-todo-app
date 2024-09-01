@@ -3,7 +3,7 @@ FROM node:20.16.0-slim as base
 # Install all dependencies
 WORKDIR /base
 COPY . ./
-RUN npm install -g bun
+RUN npm install -g bun@1.1.26
 RUN bun install --frozen-lockfile
 
 # Build the app
