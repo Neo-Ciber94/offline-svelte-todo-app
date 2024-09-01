@@ -1,0 +1,1 @@
+docker run -dp 24000:24000 -e PORT=24000 -e ORIGIN=http://localhost:24000 --restart always svelte-offline-app
