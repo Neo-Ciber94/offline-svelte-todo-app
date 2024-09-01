@@ -12,9 +12,9 @@ WORKDIR /base
 RUN cd app \
     && mkdir data \
     && npm rebuild sqlite3 \
-    && bun run db:migrate
-
+    && npm run db:migrate
 RUN bun run build
+
 
 # Keep only production dependencies
 FROM builder as release

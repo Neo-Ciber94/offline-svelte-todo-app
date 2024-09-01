@@ -11,11 +11,7 @@
 		"strict": true,
 		"moduleResolution": "bundler",
 		"experimentalDecorators": true,
-		"types": ["vite-plugin-pwa/info", "vite-plugin-pwa/vanillajs"],
-		"paths": {
-			"$lib": ["./src/lib"],
-			"$lib/*": ["./src/lib/*"]
-		}
+		"types": ["vite-plugin-pwa/info", "vite-plugin-pwa/vanillajs"]
 	}
 	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
 	// except $lib which is handled by https://kit.svelte.dev/docs/configuration#files
