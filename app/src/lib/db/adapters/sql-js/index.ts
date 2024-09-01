@@ -21,7 +21,7 @@ export class SqlJsDatabase extends SqliteDatabaseAdapter {
 	static async #initDatabase(dbName: string, storage: SqlJsStorage) {
 		const buffer = await storage.read(dbName);
 		const SQL = await initSqlJs({
-			locateFile: (file) => `/dist/${file}`
+			locateFile: (file) => `/wasm/${file}`
 		});
 
 		return new SQL.Database(buffer);
