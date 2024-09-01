@@ -15,8 +15,8 @@
   },
   "exports": {
     ".": {
-      "types": "$lib/client/dist/index.d.ts",
-      "svelte": "$lib/client/dist/index.js"
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js"
     }
   },
   "files": [
@@ -47,8 +47,8 @@
     "vite": "^5.0.11",
     "vitest": "^2.0.0"
   },
-  "svelte": "$lib/client/dist/index.js",
-  "types": "$lib/client/dist/index.d.ts",
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "dependencies": {
     "zod": "^3.23.8"
