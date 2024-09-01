@@ -15,13 +15,18 @@
 		ev.preventDefault();
 		error = undefined;
 
-		const result = await userService.login(username);
+		try {
+			const result = await userService.login(username);
 
-		if (result.success) {
-			await queryClient.invalidateQueries();
-			await goto('/todos');
-		} else {
-			error = result.error;
+			if (result.success) {
+				await queryClient.invalidateQueries();
+				await goto('/todos');
+			} else {
+				error = result.error;
+			}
+		} catch (err) {
+			console.error(err);
+			error = err instanceof Error ? err.message : 'Something went wrong';
 		}
 	}
 </script>
